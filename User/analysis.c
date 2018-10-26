@@ -10,24 +10,24 @@
 #define PI_ 3.141592654
 extern uint8_t AD_save_flag, AD_save_flag1;
 
-extern uint16_t AD_01_dataupper[2566];  //C
-extern uint16_t AD_01_datalower[2566];  //C
-extern uint16_t AD_02_dataupper[2566];  //B
-extern uint16_t AD_02_datalower[2566];  //B
-extern uint16_t AD_03_dataupper[2566];  //A
-extern uint16_t AD_03_datalower[2566];  //A
+extern uint16_t AD_01_dataupper[2560];  //C
+extern uint16_t AD_01_datalower[2560];  //C
+extern uint16_t AD_02_dataupper[2560];  //B
+extern uint16_t AD_02_datalower[2560];  //B
+extern uint16_t AD_03_dataupper[2560];  //A
+extern uint16_t AD_03_datalower[2560];  //A
 
-extern uint16_t flicker_01_dataupper[130];  //C
-extern uint16_t flicker_01_datalower[130];  //C
-extern uint16_t flicker_02_dataupper[130];  //B
-extern uint16_t flicker_02_datalower[130];  //B
-extern uint16_t flicker_03_dataupper[130];  //A
-extern uint16_t flicker_03_datalower[130];  //A
+extern uint16_t flicker_01_dataupper[128];  //C
+extern uint16_t flicker_01_datalower[128];  //C
+extern uint16_t flicker_02_dataupper[128];  //B
+extern uint16_t flicker_02_datalower[128];  //B
+extern uint16_t flicker_03_dataupper[128];  //A
+extern uint16_t flicker_03_datalower[128];  //A
 extern uint8_t AD_TEMP_flag, flicker_flag;//, flicker_Falg1;
 
-extern float fft_harmonicA_output[]; //FFT Êä³öÊı×é
-extern float fft_harmonicB_output[]; //FFT Êä³öÊı×é
-extern float fft_harmonicC_output[]; //FFT Êä³öÊı×é
+extern float fft_harmonicA_output[]; //FFT è¾“å‡ºæ•°ç»„
+extern float fft_harmonicB_output[]; //FFT è¾“å‡ºæ•°ç»„
+extern float fft_harmonicC_output[]; //FFT è¾“å‡ºæ•°ç»„
 
 
 
@@ -36,26 +36,29 @@ uint16_t AD_RMS_Time = 0;
 
 double AD_data0 = 0, AD_data1 = 0, AD_data2 = 0;
 
-double ad_RMS[3][10] = {0}; // È«¾ÖÊı×é£¬ÈıÏàµçÑ¹¾ù·½¸ùÊı×é
+double ad_RMS[3][10] = {0}; // å…¨å±€æ•°ç»„ï¼Œä¸‰ç›¸ç”µå‹å‡æ–¹æ ¹æ•°ç»„
 float LOGIC_RMS[3] = {0};
 
-/********************µçÑ¹ÓĞĞ§Öµ************************************/
-// Çó¾ù·½¸ù
-void LOGIC_Voltage_RMS_value(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[])
+/********************ç”µå‹æœ‰æ•ˆå€¼************************************/
+/* æ¯ä¸ªå‘¨æœŸï¼ˆ20msï¼‰é‡‡é›†128ä¸ªç‚¹ï¼Œè¿™æ ·çš„è¯ï¼Œæ‰€éœ€å®šæ—¶å™¨çš„é¢‘ç‡ä¸º128*50Hz=6400Hzï¼Œå³ä¸ºTIM4é¢‘ç‡ */
+void Voltage_RMS_Calc(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[])
 {
-    uint16_t i = 0, j = 0, data_j = 0;;
-    for (j = 0; j < 10; j++) {
-        data_j = j * 128;
-        for (i = 0; i < 128; i++) {
-            LOGIC_RMS[0] = (float) *(ad1 + data_j + i);//(double)
-            LOGIC_RMS[1] = (float) *(ad2 + data_j + i);//AD_02_data[data_j+i];
-            LOGIC_RMS[2] = (float) *(ad3 + data_j + i);//AD_01_data[data_j+i];
-            //if((ad0>35500)|(ad0<35500)){flag_a0++;}                              //µçÑ¹ÔİÉı¡¢Ôİ½µ¡¢¶ÌÊ±ÖĞ¶Ï
+    uint16_t i = 0, j = 0, k = 0;
+    /* é‡‡äº†10ç»„128ä¸ªç‚¹ */
+    for (j = 0; j < 10; j++) 
+    {
+        k = j * 128;
+        for (i = 0; i < 128; i++) 
+        {
+            LOGIC_RMS[0] = (float) *(ad1 + k + i);
+            LOGIC_RMS[1] = (float) *(ad2 + k + i);
+            LOGIC_RMS[2] = (float) *(ad3 + k + i);
+            //if((ad0>35500)|(ad0<35500)){flag_a0++;}//ç”µå‹æš‚å‡ã€æš‚é™ã€çŸ­æ—¶ä¸­æ–­
             // if((ad0>35500)|(ad0<35500)){flag_a1++;}
             //if((ad0>35500)|(ad0<35500)){flag_a2++;}
-            AD_data0 = pow(LOGIC_RMS[0], 2) + AD_data0;//
-            AD_data1 = pow(LOGIC_RMS[1], 2) + AD_data1;//pow(LOGIC_RMS[1],2)
-            AD_data2 = pow(LOGIC_RMS[2], 2) + AD_data2;   //pow(LOGIC_RMS[2],2)
+            AD_data0 = pow(LOGIC_RMS[0], 2) + AD_data0;
+            AD_data1 = pow(LOGIC_RMS[1], 2) + AD_data1;
+            AD_data2 = pow(LOGIC_RMS[2], 2) + AD_data2;
         }
         ad_RMS[0][j] = sqrt(AD_data0 / 128);
         ad_RMS[1][j] = sqrt(AD_data1 / 128);
@@ -64,11 +67,11 @@ void LOGIC_Voltage_RMS_value(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[])
         AD_data1 = 0;
         AD_data2 = 0;
     }
-    // ÒÔÏÂÇó10´Î¾ù·½¸ùµÄ¾ùÖµ£¬È»ºó¸ÉÉ¶ÓÃÄØ
     LOGIC_RMS[0] = 0;
     LOGIC_RMS[1] = 0;
     LOGIC_RMS[2] = 0;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 10; i++) 
+    {
         LOGIC_RMS[0] = LOGIC_RMS[0] + ad_RMS[0][i];
         LOGIC_RMS[1] = LOGIC_RMS[1] + ad_RMS[1][i];
         LOGIC_RMS[2] = LOGIC_RMS[2] + ad_RMS[2][i];
@@ -82,83 +85,94 @@ void LOGIC_Voltage_RMS_value(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[])
 }
 
 
-/********************µçÑ¹Ôİ½µ¡¢ÔİÉı£ºµçÑ¹Ôİ½µÊÇÖ¸µçÁ¦ÏµÍ³ÖĞÄ³µã¹¤ÆµµçÑ¹·½¾ù¸ùÖµÔİÊ±½µµÍÖÁ0.1~0.9p.u.£¬²¢ÔÚ
-¶ÌÊ±³ÖĞø10ms~1minºó»Ö¸´Õı³£µÄÏÖÏó£»µçÑ¹ÔİÉıÊÇÖ¸µçÁ¦ÏµÍ³ÖĞÄ³µã¹¤Æµ·½¾ù¸ùÖµÔİÊ±ÉÏÉıÖÁ1.1~1.8p.u.£¬²¢ÔÚ¶ÌÊ±³Ö
-Ğø10ms~1minºó»Ö¸´Õı³£µÄÏÖÏó£»µçÑ¹ÖĞ¶ÏÊÇÖ¸Ò»Ïà»ò¶àÏàµçÑ¹Ë²Ê±½µµÍµ½0.1p.u.ÒÔÏÂ£¬ÇÒ³ÖĞøÊ±¼äÎª10ms~1min¡£µçÑ¹Ôİ
-½µ¡¢ÔİÉıµÄµçÑ¹ÓĞĞ§ÖµµÄ±ä»¯·¶Î§´óÓÚ¡À10%¡£²Î¿¼ÓÚ¡¶µçÄÜÖÊÁ¿ µçÑ¹Ôİ½µÓë¶ÌÊ±ÖĞ¶Ï¡· GB/T 30137-2013¡£*************/
+/********************ç”µå‹æš‚é™ã€æš‚å‡ï¼šç”µå‹æš‚é™æ˜¯æŒ‡ç”µåŠ›ç³»ç»Ÿä¸­æŸç‚¹å·¥é¢‘ç”µå‹æ–¹å‡æ ¹å€¼æš‚æ—¶é™ä½è‡³0.1~0.9p.u.ï¼Œå¹¶åœ¨
+çŸ­æ—¶æŒç»­10ms~1minåæ¢å¤æ­£å¸¸çš„ç°è±¡ï¼›ç”µå‹æš‚å‡æ˜¯æŒ‡ç”µåŠ›ç³»ç»Ÿä¸­æŸç‚¹å·¥é¢‘æ–¹å‡æ ¹å€¼æš‚æ—¶ä¸Šå‡è‡³1.1~1.8p.u.ï¼Œå¹¶åœ¨çŸ­æ—¶æŒ
+ç»­10ms~1minåæ¢å¤æ­£å¸¸çš„ç°è±¡ï¼›ç”µå‹ä¸­æ–­æ˜¯æŒ‡ä¸€ç›¸æˆ–å¤šç›¸ç”µå‹ç¬æ—¶é™ä½åˆ°0.1p.u.ä»¥ä¸‹ï¼Œä¸”æŒç»­æ—¶é—´ä¸º10ms~1minã€‚ç”µå‹æš‚
+é™ã€æš‚å‡çš„ç”µå‹æœ‰æ•ˆå€¼çš„å˜åŒ–èŒƒå›´å¤§äºÂ±10%ã€‚å‚è€ƒäºã€Šç”µèƒ½è´¨é‡ ç”µå‹æš‚é™ä¸çŸ­æ—¶ä¸­æ–­ã€‹ GB/T 30137-2013ã€‚*************/
 
-// p.u.ÊÇÒ»¸ö±êçÛÖµ£¨per unit£©µÄËõĞ´¡£
-//±ÈÈç£¬220v=1p.u. £¬ÄÇÃ´0.1¸öp.u.¾ÍÊÇ22v
+// p.u.æ˜¯ä¸€ä¸ªæ ‡å¹ºå€¼ï¼ˆper unitï¼‰çš„ç¼©å†™ã€‚
+//æ¯”å¦‚ï¼Œ220v=1p.u. ï¼Œé‚£ä¹ˆ0.1ä¸ªp.u.å°±æ˜¯22v
 
 void LOGIC_zansheng_zanjiang_zhongduan(void)
 {
-
-    for (uint8_t i = 0; i < 10; i++) {
+    for (uint8_t i = 0; i < 10; i++) 
+    {
 //A
-        if (ad_RMS[0][i] > VOL_STD_RMS_A) {
+        if (ad_RMS[0][i] > VOL_STD_RMS_A) 
+        {
             if (((ad_RMS[0][i] - VOL_STD_RMS_A) > 0.1 * VOL_STD_RMS_A) && // >1.1p.u.
-                ((ad_RMS[0][i] - VOL_STD_RMS_A) < 0.8 * VOL_STD_RMS_A)) { // <1.8p.u.
-                //todo: ²¨ĞÎ´æ´¢·¢ËÍ  ÔİÉı
+                ((ad_RMS[0][i] - VOL_STD_RMS_A) < 0.8 * VOL_STD_RMS_A))  // <1.8p.u.
+            {
+                //todo: æ ¹æ®AD_save_flagï¼Œè¿›è¡Œæ³¢å½¢å­˜å‚¨å‘é€  æš‚å‡
             }
         }
-        else if (ad_RMS[0][i] < VOL_STD_RMS_A) {
+        else if (ad_RMS[0][i] < VOL_STD_RMS_A) 
+        {
             if (((VOL_STD_RMS_A - ad_RMS[0][i]) > 0.1 * VOL_STD_RMS_A) && // <0.9p.u.
-                ((VOL_STD_RMS_A - ad_RMS[0][i]) < 0.9 * VOL_STD_RMS_A)) { // >0.1p.u.
-                //todo: ²¨ĞÎ´æ´¢·¢ËÍ   Ôİ½µ
+                ((VOL_STD_RMS_A - ad_RMS[0][i]) < 0.9 * VOL_STD_RMS_A)) // >0.1p.u.
+            { 
+                //todo: æ³¢å½¢å­˜å‚¨å‘é€   æš‚é™
             }
-            if (((VOL_STD_RMS_A - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_A)) {
-                //todo: ²¨ĞÎ´æ´¢·¢ËÍ   ÖĞ¶Ï
+            if (((VOL_STD_RMS_A - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_A)) 
+            {
+                //todo: æ³¢å½¢å­˜å‚¨å‘é€   ä¸­æ–­
             }
         }
-
-
 //B  
-        if (ad_RMS[1][i] > VOL_STD_RMS_B) {
+        if (ad_RMS[1][i] > VOL_STD_RMS_B) 
+        {
             if (((ad_RMS[1][i] - VOL_STD_RMS_B) > 0.1 * VOL_STD_RMS_B) &&
-                ((ad_RMS[1][i] - VOL_STD_RMS_B) < 0.8 * VOL_STD_RMS_B)) {
-                //²¨ĞÎ´æ´¢·¢ËÍ    ÔİÉı
+                ((ad_RMS[1][i] - VOL_STD_RMS_B) < 0.8 * VOL_STD_RMS_B)) 
+            {
+                //æ³¢å½¢å­˜å‚¨å‘é€    æš‚å‡
             }
         }
-        else if (ad_RMS[01][i] < VOL_STD_RMS_B) {
+        else if (ad_RMS[01][i] < VOL_STD_RMS_B) 
+        {
             if (((VOL_STD_RMS_B - ad_RMS[0][i]) > 0.1 * VOL_STD_RMS_B) &&
-                ((VOL_STD_RMS_B - ad_RMS[1][i]) < 0.9 * VOL_STD_RMS_B)) {
-                //²¨ĞÎ´æ´¢·¢ËÍ     Ôİ½µ
+                ((VOL_STD_RMS_B - ad_RMS[1][i]) < 0.9 * VOL_STD_RMS_B)) 
+            {
+                //æ³¢å½¢å­˜å‚¨å‘é€     æš‚é™
             }
 
-            if (((VOL_STD_RMS_B - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_B)) {
-                //²¨ĞÎ´æ´¢·¢ËÍ    ÖĞ¶Ï
+            if (((VOL_STD_RMS_B - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_B)) 
+            {
+                //æ³¢å½¢å­˜å‚¨å‘é€    ä¸­æ–­
             }
         }
-
-
 //C  
-        if (ad_RMS[2][i] > VOL_STD_RMS_C) {
+        if (ad_RMS[2][i] > VOL_STD_RMS_C) 
+        {
             if (((ad_RMS[2][i] - VOL_STD_RMS_C) > 0.1 * VOL_STD_RMS_C) &&
-                ((ad_RMS[2][i] - VOL_STD_RMS_C) < 0.8 * VOL_STD_RMS_C)) {
-                //²¨ĞÎ´æ´¢·¢ËÍ  ÔİÉı
+                ((ad_RMS[2][i] - VOL_STD_RMS_C) < 0.8 * VOL_STD_RMS_C)) 
+            {
+                //æ³¢å½¢å­˜å‚¨å‘é€  æš‚å‡
             }
         }
-        else if (ad_RMS[2][i] < VOL_STD_RMS_C) {
+        else if (ad_RMS[2][i] < VOL_STD_RMS_C) 
+        {
             if (((VOL_STD_RMS_C - ad_RMS[0][i]) > 0.1 * VOL_STD_RMS_C) &&
-                ((VOL_STD_RMS_C - ad_RMS[2][i]) < 0.9 * VOL_STD_RMS_C)) {
-                //²¨ĞÎ´æ´¢·¢ËÍ    Ôİ½µ
+                ((VOL_STD_RMS_C - ad_RMS[2][i]) < 0.9 * VOL_STD_RMS_C)) 
+            {
+                //æ³¢å½¢å­˜å‚¨å‘é€    æš‚é™
             }
-            if (((VOL_STD_RMS_C - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_C)) {
-                //²¨ĞÎ´æ´¢·¢ËÍ   ÖĞ¶Ï
+            if (((VOL_STD_RMS_C - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_C)) 
+            {
+                //æ³¢å½¢å­˜å‚¨å‘é€   ä¸­æ–­
             }
         }
     }
 }
 
 
-/*********************µçÑ¹Æ«²î********************************/
-/******************Ñ¹Æ«²îÇ¿µ÷µÄÊÇÊµ¼ÊµçÑ¹Æ«ÀëÏµÍ³±ê³ÆµçÑ¹µÄÊıÖµ
-£¬ÓëÆ«²î³ÖĞøµÄÊ±¼äÎŞ¹Ø¡£²Î¿¼ÓÚ¡¶µçÄÜÖÊÁ¿ ¹©µçµçÑ¹Æ«²î¡·
+/*********************ç”µå‹åå·®********************************/
+/******************å‹åå·®å¼ºè°ƒçš„æ˜¯å®é™…ç”µå‹åç¦»ç³»ç»Ÿæ ‡ç§°ç”µå‹çš„æ•°å€¼
+ï¼Œä¸åå·®æŒç»­çš„æ—¶é—´æ— å…³ã€‚å‚è€ƒäºã€Šç”µèƒ½è´¨é‡ ä¾›ç”µç”µå‹åå·®ã€‹
 GB/T 12325-2008************************************************/
 double Data_deviation[3][2];
 double Data_deviation1[3][2];
 // [:][1] for value, [:][0] for sign
-void LOGIC_voltage_deviation(void)
+void Voltage_Deviation_Calc(void)
 {
 
     for (uint8_t i = 0; i < 10; i++) {
@@ -174,71 +188,71 @@ void LOGIC_voltage_deviation(void)
     Data_deviation[1][1] = 0;
     Data_deviation[2][1] = 0;
     //A
-    if (Data_deviation1[0][1] > VOL_STD_RMS_A)  //ÕıÆ«²î
+    if (Data_deviation1[0][1] > VOL_STD_RMS_A)  //æ­£åå·®
     {
         Data_deviation[0][1] = (Data_deviation1[0][1] - VOL_STD_RMS_A)
                                 / VOL_STD_RMS_A;
         Data_deviation[0][0] = 1;
     }
-    else if (Data_deviation1[0][1] < VOL_STD_RMS_A)//¸ºÆ«²î
+    else if (Data_deviation1[0][1] < VOL_STD_RMS_A)//è´Ÿåå·®
     {
         Data_deviation[0][1] = (VOL_STD_RMS_A - Data_deviation1[0][1])
                                 / VOL_STD_RMS_A;
         Data_deviation[0][0] = -1;
     }
     //B
-    if (Data_deviation1[1][1] > VOL_STD_RMS_B)  //ÕıÆ«²î
+    if (Data_deviation1[1][1] > VOL_STD_RMS_B)  //æ­£åå·®
     {
         Data_deviation[1][1] = (Data_deviation1[1][1] - VOL_STD_RMS_B)
                                 / VOL_STD_RMS_B;
         Data_deviation[0][0] = 1;
     }
-    else if (Data_deviation1[1][1] < VOL_STD_RMS_B)//¸ºÆ«²î
+    else if (Data_deviation1[1][1] < VOL_STD_RMS_B)//è´Ÿåå·®
     {
         Data_deviation[1][1] = (VOL_STD_RMS_B - Data_deviation1[1][1])
                                 / VOL_STD_RMS_B;
         Data_deviation[0][0] = -1;
     }
     //C
-    if (Data_deviation1[2][1] > VOL_STD_RMS_C)  //ÕıÆ«²î
+    if (Data_deviation1[2][1] > VOL_STD_RMS_C)  //æ­£åå·®
     {
         Data_deviation[2][1] = (Data_deviation1[2][1] - VOL_STD_RMS_C)
                                 / VOL_STD_RMS_C;
         Data_deviation[0][0] = 1;
     }
-    else if (Data_deviation1[2][1] < VOL_STD_RMS_C)//¸ºÆ«²î
+    else if (Data_deviation1[2][1] < VOL_STD_RMS_C)//è´Ÿåå·®
     {
         Data_deviation[2][1] = (VOL_STD_RMS_C - Data_deviation1[2][1])
                                 / VOL_STD_RMS_C;
         Data_deviation[0][0] = -1;
     }
-    // ¼Ó¸ö±êÖ¾Î»
+    // åŠ ä¸ªæ ‡å¿—ä½
 }
 
 
 
-/*********************µçÑ¹²¨¶¯********************************/
-/*µçÑ¹²¨¶¯£ºµçÑ¹·½¾ù¸ùÖµÒ»ÏµÁĞÏà¶Ô¿ìËÙ±ä¶¯»òÁ¬Ğø¸Ä±äµÄÏÖÏó£¬
-IEEEÖĞ¸ø³öµÄµäĞÍµçÑ¹²¨¶¯·¶Î§Îª0.1%~7%£¬±ä»¯ÆµÂÊĞ¡ÓÚ25Hz£¬
-µçÑ¹µÄÓĞĞ§ÖµµÄ±ä»¯·¶Î§Ğ¡ÓÚ¡À10%¡£¿É²Î¿¼¡¶µçÄÜÖÊÁ¿ µçÑ¹²¨¶¯ÓëÉÁ±ä¡·
-GB/T 12326-2008¡£**********************************************/
-void GET_LESSTHAN25Hz_data(void)//20msÈ¡256¸öµã£¬50·ÖÖ®Ò»¾ÍÊÇ1ÃëÈ¡256¸öµã½øĞĞFFT
+/*********************ç”µå‹æ³¢åŠ¨********************************/
+/*ç”µå‹æ³¢åŠ¨ï¼šç”µå‹æ–¹å‡æ ¹å€¼ä¸€ç³»åˆ—ç›¸å¯¹å¿«é€Ÿå˜åŠ¨æˆ–è¿ç»­æ”¹å˜çš„ç°è±¡ï¼Œ
+IEEEä¸­ç»™å‡ºçš„å…¸å‹ç”µå‹æ³¢åŠ¨èŒƒå›´ä¸º0.1%~7%ï¼Œå˜åŒ–é¢‘ç‡å°äº25Hzï¼Œ
+ç”µå‹çš„æœ‰æ•ˆå€¼çš„å˜åŒ–èŒƒå›´å°äºÂ±10%ã€‚å¯å‚è€ƒã€Šç”µèƒ½è´¨é‡ ç”µå‹æ³¢åŠ¨ä¸é—ªå˜ã€‹
+GB/T 12326-2008ã€‚**********************************************/
+void GET_LESSTHAN25Hz_data(void)//20mså–256ä¸ªç‚¹ï¼Œ50åˆ†ä¹‹ä¸€å°±æ˜¯1ç§’å–256ä¸ªç‚¹è¿›è¡ŒFFT
 {
 
     if (0x01 == AD_save_flag1) {
-        Harmonic_calculation_FFT(flicker_03_dataupper, A_line);//Ğ³²¨¼ÆËã a
-        Harmonic_calculation_FFT(flicker_02_dataupper, B_line);//Ğ³²¨¼ÆËã b
-        Harmonic_calculation_FFT(flicker_01_dataupper, C_line);//Ğ³²¨¼ÆËã c
+        Harmonic_calculation_FFT(flicker_03_dataupper, A_line);//è°æ³¢è®¡ç®— a
+        Harmonic_calculation_FFT(flicker_02_dataupper, B_line);//è°æ³¢è®¡ç®— b
+        Harmonic_calculation_FFT(flicker_01_dataupper, C_line);//è°æ³¢è®¡ç®— c
     }
     if (0x00 == AD_save_flag1) {
-        Harmonic_calculation_FFT(flicker_03_datalower, A_line);//Ğ³²¨¼ÆËã a
-        Harmonic_calculation_FFT(flicker_02_datalower, B_line);//Ğ³²¨¼ÆËã b
-        Harmonic_calculation_FFT(flicker_01_datalower, C_line);//Ğ³²¨¼ÆËã c
+        Harmonic_calculation_FFT(flicker_03_datalower, A_line);//è°æ³¢è®¡ç®— a
+        Harmonic_calculation_FFT(flicker_02_datalower, B_line);//è°æ³¢è®¡ç®— b
+        Harmonic_calculation_FFT(flicker_01_datalower, C_line);//è°æ³¢è®¡ç®— c
     }
 
 }
 
-/********************µçÑ¹ÉÁ±ä***************************/
+/********************ç”µå‹é—ªå˜***************************/
 //
 //void LOGIC_voltage_flicker(float B0, float B1, float B2)
 //{
@@ -247,7 +261,7 @@ void GET_LESSTHAN25Hz_data(void)//20msÈ¡256¸öµã£¬50·ÖÖ®Ò»¾ÍÊÇ1ÃëÈ¡256¸öµã½øĞĞFFT
 
 
 
-/*********Ğ³²¨¼°·åÖµ¼ÆËã***************************************
+/*********è°æ³¢åŠå³°å€¼è®¡ç®—***************************************
 
 
 void Get_50HZ_data(void)
@@ -262,7 +276,7 @@ void Get_50HZ_data(void)
 }
 */
 
-/***********************ÏàÎ»¼°ÆµÂÊ¼ÆËã********************************/
+/***********************ç›¸ä½åŠé¢‘ç‡è®¡ç®—********************************/
 
 
 uint16_t TIME_A[3] = {0},
@@ -277,7 +291,7 @@ uint16_t TIME_DIFF[3][2] = {0};
 // after [:][0] is set, it increases itself in tim7 interrupt routine
 uint16_t TIME_DIFF_PHASE[3][2] = {0};
 
-uint16_t TIMER_BUFFER[3] = {0}; /* Êı¾İ²É¼¯´Î¼ÆÊı±äÁ¿ */
+uint16_t TIMER_BUFFER[3] = {0}; /* æ•°æ®é‡‡é›†æ¬¡è®¡æ•°å˜é‡ */
 //uint16_t  TIM7_CNT_OLD, TIM7_CNT_NOW, TIM7_UPDATE_CNT;
 float freq_tab[3];
 float phase_tab_ang[3];
@@ -295,41 +309,41 @@ static uint16_t TIME_DIFF_PHASE_DATA[3][2] = {0},
 static uint32_t aassd = 0;
 volatile uint8_t deviation_diff = 200;
 
-/********************Êı¾İ¼ÆËã***************************************/
+/********************æ•°æ®è®¡ç®—***************************************/
 
 void data_process(void)
 {
     if (0x01 == AD_TEMP_flag) {
         AD_TEMP_flag = 0;
-        if (0x01 == AD_save_flag) {
-            Harmonic_calculation_FFT(AD_03_dataupper, A_line);
-            Harmonic_calculation_FFT(AD_02_dataupper, B_line);
-            Harmonic_calculation_FFT(AD_01_dataupper, C_line);
-        }
-        if (0x00 == AD_save_flag) {
-            Harmonic_calculation_FFT(AD_03_datalower, A_line);
-            Harmonic_calculation_FFT(AD_02_datalower, B_line);
-            Harmonic_calculation_FFT(AD_01_datalower, C_line);
-        }
+        // if (0x01 == AD_save_flag) {
+        //     Harmonic_calculation_FFT(AD_03_dataupper, A_line);
+        //     Harmonic_calculation_FFT(AD_02_dataupper, B_line);
+        //     Harmonic_calculation_FFT(AD_01_dataupper, C_line);
+        // }
+        // if (0x00 == AD_save_flag) {
+        //     Harmonic_calculation_FFT(AD_03_datalower, A_line);
+        //     Harmonic_calculation_FFT(AD_02_datalower, B_line);
+        //     Harmonic_calculation_FFT(AD_01_datalower, C_line);
+        // }
 
-        HAL_Delay(1);
+        // HAL_Delay(1);
         if (0x01 == AD_save_flag)
-            LOGIC_Voltage_RMS_value(AD_01_dataupper,
+            Voltage_RMS_Calc(AD_01_dataupper,
                 AD_02_dataupper, AD_03_dataupper);
         if (0x00 == AD_save_flag)
-            LOGIC_Voltage_RMS_value(AD_01_datalower,
+            Voltage_RMS_Calc(AD_01_datalower,
                 AD_02_datalower, AD_03_datalower);
-        //¼ÆËãºó»á´æ´¢µ½ad_RMSÀïÃæ
-        HAL_Delay(1);
-        LOGIC_zansheng_zanjiang_zhongduan(); //µçÑ¹ÔİÉıÔİ½µ ¶ÌÊ±ÖĞ¶Ï
-        LOGIC_voltage_deviation();                 //µçÑ¹Æ«²î
+        //è®¡ç®—åä¼šå­˜å‚¨åˆ°ad_RMSé‡Œé¢
+        // HAL_Delay(1);
+        // LOGIC_zansheng_zanjiang_zhongduan(); //ç”µå‹æš‚å‡æš‚é™ çŸ­æ—¶ä¸­æ–­
+        // Voltage_Deviation_Calc();                 //ç”µå‹åå·®
     }
 
-    if (0x01 == flicker_flag)              //ÉÁ±ä
-    {
-        flicker_flag = 0;
-        GET_LESSTHAN25Hz_data();
-        HAL_Delay(1);
-    }
+    // if (0x01 == flicker_flag)              //é—ªå˜
+    // {
+    //     flicker_flag = 0;
+    //     GET_LESSTHAN25Hz_data();
+    //     HAL_Delay(1);
+    // }
 }
 

@@ -56,6 +56,7 @@
 #include "stm32f4xx_hal.h"
 #include "freq_cap.h"
 #include "tim.h"
+#include "analysis.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -118,6 +119,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    data_process();
     osDelay(15);
     // 2 avoid conflict with default value 0
     if(pfreq->phase_bgn_flg[0] == 2

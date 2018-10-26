@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "cmsis_os.h": "c",
+        "freertos.h": "c",
+        "portable.h": "c",
+        "portmacro.h": "c",
+        "task.h": "c",
+        "mpu_wrappers.h": "c",
+        "list.h": "c",
+        "stddef.h": "c",
+        "math.h": "c",
+        "analysis.h": "c"
+    }
+}
