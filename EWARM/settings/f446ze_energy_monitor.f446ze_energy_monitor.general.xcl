@@ -1,0 +1,15 @@
+"D:\app\IAR Systems\Embedded Workbench 7.2\arm\bin\armproc.dll" 
+
+"D:\app\IAR Systems\Embedded Workbench 7.2\arm\bin\armjlink.dll" 
+
+"C:\Users\13567\Desktop\f446ze_energy_monitor\EWARM\f446ze_energy_monitor\Exe\f446ze_energy_monitor.out" 
+
+--plugin "D:\app\IAR Systems\Embedded Workbench 7.2\arm\bin\armbat.dll" 
+
+--device_macro "D:\app\IAR Systems\Embedded Workbench 7.2\arm\config\debugger\ST\STM32F4xx.dmac" 
+
+--flash_loader "D:\app\IAR Systems\Embedded Workbench 7.2\arm\config\flashloader\ST\FlashSTM32F446xE.board" 
+
+
+
+

@@ -336,9 +336,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_HAL_DRIVER,STM32F446xx</Define>
+              <Define>USE_HAL_DRIVER,STM32F446xx,ARM_MATH_CM4</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc; ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy; ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F; ../Drivers/CMSIS/Device/ST/STM32F4xx/Include; ../Middlewares/Third_Party/FreeRTOS/Source/include; ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS; ../Drivers/CMSIS/Include; ..\User</IncludePath>
+              <IncludePath>../Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc;  ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;  ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;  ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;  ../Middlewares/Third_Party/FreeRTOS/Source/include;  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;  ../Drivers/CMSIS/Include;  ..\User</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -402,6 +402,66 @@
               <FileType>5</FileType>
               <FilePath>..\User\freq_cap.h</FilePath>
             </File>
+            <File>
+              <FileName>max11046.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\max11046.c</FilePath>
+            </File>
+            <File>
+              <FileName>max11046.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\max11046.h</FilePath>
+            </File>
+            <File>
+              <FileName>analysis.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\analysis.c</FilePath>
+            </File>
+            <File>
+              <FileName>analysis.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\analysis.h</FilePath>
+            </File>
+            <File>
+              <FileName>fft.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\fft.c</FilePath>
+            </File>
+            <File>
+              <FileName>fft.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\fft.h</FilePath>
+            </File>
+            <File>
+              <FileName>nrf24l01.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\nrf24l01.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf24l01.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\nrf24l01.h</FilePath>
+            </File>
+            <File>
+              <FileName>nrf24l01_reg.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\nrf24l01_reg.h</FilePath>
+            </File>
+            <File>
+              <FileName>w25q64.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\w25q64.c</FilePath>
+            </File>
+            <File>
+              <FileName>w25q64.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\w25q64.h</FilePath>
+            </File>
+            <File>
+              <FileName>arm_cortexM4lf_math.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\User\arm_cortexM4lf_math.lib</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -426,6 +486,11 @@
               <FileName>tim.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/usart.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_it.c</FileName>
@@ -456,6 +521,11 @@
               <FileName>stm32f4xx_hal_tim_ex.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_hal_rcc.c</FileName>
