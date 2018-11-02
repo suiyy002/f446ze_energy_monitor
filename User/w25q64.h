@@ -10,11 +10,11 @@
 //#define W25Q64_VDD BIT4
 
 /***************W25Q128*************************************
-Ò»¸öBLOCK£º64KB(ÉÈÇø)
-Ò»¸öSECTOR£º4KB£¨¿é£©
-Ò»¹²128b/8=16MB
-Ò»¹²16000KB/64KB=250¸öBLOCK
-Ã¿¸öBLOCK£º64/8=8¸ösector
+Ò»ï¿½ï¿½BLOCKï¿½ï¿½64KB(ï¿½ï¿½ï¿½ï¿½)
+Ò»ï¿½ï¿½SECTORï¿½ï¿½4KBï¿½ï¿½ï¿½é£©
+Ò»ï¿½ï¿½128b/8=16MB
+Ò»ï¿½ï¿½16000KB/64KB=250ï¿½ï¿½BLOCK
+Ã¿ï¿½ï¿½BLOCKï¿½ï¿½64/8=8ï¿½ï¿½sector
 
 
 
@@ -24,10 +24,10 @@
 
 
 
-#define SPIFlash_Set_DO    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET)//(P2OUT |= W25Q64_DI)
-#define SPIFlash_Clr_DO    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET)//(P2OUT &= ~W25Q64_DI)      
+#define SPIFlash_Set_DO    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_SET)//(P2OUT |= W25Q64_DI)
+#define SPIFlash_Clr_DO    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0, GPIO_PIN_RESET)//(P2OUT &= ~W25Q64_DI)      
 
-#define SPIFlash_Get_DI    HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_0)       //(P2IN &= W25Q64_DO)
+#define SPIFlash_Get_DI    HAL_GPIO_ReadPin(GPIOD,GPIO_PIN_2)       //(P2IN &= W25Q64_DO)
 
 #define SPIFlash_Set_SCLK    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_SET)//(P2OUT |= W25Q64_CLK)
 #define SPIFlash_Clr_SCLK    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, GPIO_PIN_RESET)//(P2OUT &= ~W25Q64_CLK)        
@@ -37,12 +37,12 @@
 #define W25Q64_VDD_0    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_RESET)//(P2OUT &= ~W25Q64_VDD)        //P1.6
 
 
-//#define    SPIFlash_Enable_CS      (P8OUT &= 0XFE)           //´ò¿ªspiflashÆ¬Ñ¡Ê¹ÄÜ
-//#define    SPIFlash_Disable_CS     (P8OUT |= 0X01)           //¹Ø±ÕspiflashÆ¬Ñ¡Ê¹ÄÜ
-//#define    SPIFlash_Set_SCLK       (P7OUT |= 0X08)           //À­¸ßspiflashÊ±ÖÓÏß
-//#define    SPIFlash_Clr_SCLK       (P7OUT &= 0Xf7)           //À­µÍspiflashÊ±ÖÓÏß
-//#define    SPIFlash_Set_DO         (P8OUT |= 0X04)           //MOSIÊý¾ÝÏßÖÃ1,¼´Êä³ö1¸ßµçÆ½
-//#define    SPIFlash_Clr_DO         (P8OUT &= 0XFB)           //MOSIÊý¾ÝÏßÇå0,¼´Êä³ö0µÍµçÆ½
+//#define    SPIFlash_Enable_CS      (P8OUT &= 0XFE)           //ï¿½ï¿½spiflashÆ¬Ñ¡Ê¹ï¿½ï¿½
+//#define    SPIFlash_Disable_CS     (P8OUT |= 0X01)           //ï¿½Ø±ï¿½spiflashÆ¬Ñ¡Ê¹ï¿½ï¿½
+//#define    SPIFlash_Set_SCLK       (P7OUT |= 0X08)           //ï¿½ï¿½ï¿½ï¿½spiflashÊ±ï¿½ï¿½ï¿½ï¿½
+//#define    SPIFlash_Clr_SCLK       (P7OUT &= 0Xf7)           //ï¿½ï¿½ï¿½ï¿½spiflashÊ±ï¿½ï¿½ï¿½ï¿½
+//#define    SPIFlash_Set_DO         (P8OUT |= 0X04)           //MOSIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1,ï¿½ï¿½ï¿½ï¿½ï¿½1ï¿½ßµï¿½Æ½
+//#define    SPIFlash_Clr_DO         (P8OUT &= 0XFB)           //MOSIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0,ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½Íµï¿½Æ½
 
 
 
@@ -61,7 +61,7 @@ typedef enum
     RET_WaitBusy_ERROR
 }SpiRetValueType;
 /*****************************************************************************
-** ¹Ü½Å¶¨Òå
+** ï¿½Ü½Å¶ï¿½ï¿½ï¿½
 *****************************************************************************/
 
 
@@ -81,7 +81,7 @@ typedef enum
 #define    SPIFlash_SECBYTE_LENGTH   (1024*4)
 
 /*******************************************************************************
-** º¯ÊýÉùÃ÷
+** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 *******************************************************************************/
 uint8_t SpiFlash_ReadOneByte(void);
 void SpiFlash_WriteOneByte(uint8_t DataBuffer);

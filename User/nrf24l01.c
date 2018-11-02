@@ -1,7 +1,7 @@
 #include "stm32f4xx_hal.h"
 #include "nrf24l01.h"
 #include "nrf24l01_reg.h"
-
+#include "delay.h"
 
 unsigned char TestBuf=0;
 
@@ -28,7 +28,7 @@ uchar flag,q;
 //timfalg  TimeFalg;
 
 //******************************************************************************************
-//ÑÓÊ±º¯Êý
+//å»¶æ—¶å‡½æ•°
 //******************************************************************************************
 
 void delay_50us(unsigned int i)
@@ -43,16 +43,16 @@ void delay_50us(unsigned int i)
 
 void delay_100ms(unsigned int i)
 {
-	HAL_Delay(i);
+	delay_ms(i);
 }
 
 void msDelay(unsigned int ms)
 {
-   HAL_Delay(ms);
+   delay_ms(ms);
 }
 void delay_1ms(unsigned int i)
 {
-	 HAL_Delay(i);
+	 delay_ms(i);
 }
 void inerDelay_us(int n)
 {
@@ -327,10 +327,10 @@ void RX_Mode(unsigned char W_RF)
 	SPI_Write_Buf(RF_WRITE_REG + RX_ADDR_P0, TX_ADDRESS, RX_ADR_WIDTH,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + EN_AA, ENAA_P0,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + SETUP_RETR,0x1a,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //Ê¹ÄÜÍ¨µÀ0µÄ½ÓÊÕµØÖ· 
-	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 10,W_RF);        //ÉèÖÃRFÍ¨µÀÎª2.400GHz  ÆµÂÊ=2.4+0GHz
+	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //ä½¿èƒ½é€šé“0çš„æŽ¥æ”¶åœ°å€ 
+	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 50,W_RF);        //è®¾ç½®RFé€šé“ä¸º2.400GHz  é¢‘çŽ‡=2.4+0GHz
 	SPI_RW_Reg(RF_WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //ÉèÖÃTX·¢Éä²ÎÊý,0dbÔöÒæ,2Mbps,µÍÔëÉùÔöÒæ¿ªÆô
+	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //è®¾ç½®TXå‘å°„å‚æ•°,0dbå¢žç›Š,2Mbps,ä½Žå™ªå£°å¢žç›Šå¼€å¯
 	SPI_RW_Reg(RF_WRITE_REG + CONFIG, 0x0f,W_RF);   
         CE_Pin(1,W_RF);   break;
       case 1:
@@ -339,10 +339,10 @@ void RX_Mode(unsigned char W_RF)
 	SPI_Write_Buf(RF_WRITE_REG + RX_ADDR_P0, TX_ADDRESS1, RX_ADR_WIDTH,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + EN_AA, ENAA_P0,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + SETUP_RETR,0x1a,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //Ê¹ÄÜÍ¨µÀ0µÄ½ÓÊÕµØÖ· 
-	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 10,W_RF);        //ÉèÖÃRFÍ¨µÀÎª2.400GHz  ÆµÂÊ=2.4+0GHz
+	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //ä½¿èƒ½é€šé“0çš„æŽ¥æ”¶åœ°å€ 
+	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 10,W_RF);        //è®¾ç½®RFé€šé“ä¸º2.400GHz  é¢‘çŽ‡=2.4+0GHz
 	SPI_RW_Reg(RF_WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //ÉèÖÃTX·¢Éä²ÎÊý,0dbÔöÒæ,2Mbps,µÍÔëÉùÔöÒæ¿ªÆô
+	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //è®¾ç½®TXå‘å°„å‚æ•°,0dbå¢žç›Š,2Mbps,ä½Žå™ªå£°å¢žç›Šå¼€å¯
 	SPI_RW_Reg(RF_WRITE_REG + CONFIG, 0x0f,W_RF);   
         CE_Pin(1,W_RF);   break;     
       case 2:
@@ -351,10 +351,10 @@ void RX_Mode(unsigned char W_RF)
 	SPI_Write_Buf(RF_WRITE_REG + RX_ADDR_P0, TX_ADDRESS2, RX_ADR_WIDTH,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + EN_AA, ENAA_P0,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + SETUP_RETR,0x1a,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //Ê¹ÄÜÍ¨µÀ0µÄ½ÓÊÕµØÖ· 
-	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 10,W_RF);        //ÉèÖÃRFÍ¨µÀÎª2.400GHz  ÆµÂÊ=2.4+0GHz
+	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //ä½¿èƒ½é€šé“0çš„æŽ¥æ”¶åœ°å€ 
+	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 10,W_RF);        //è®¾ç½®RFé€šé“ä¸º2.400GHz  é¢‘çŽ‡=2.4+0GHz
 	SPI_RW_Reg(RF_WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //ÉèÖÃTX·¢Éä²ÎÊý,0dbÔöÒæ,2Mbps,µÍÔëÉùÔöÒæ¿ªÆô
+	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //è®¾ç½®TXå‘å°„å‚æ•°,0dbå¢žç›Š,2Mbps,ä½Žå™ªå£°å¢žç›Šå¼€å¯
 	SPI_RW_Reg(RF_WRITE_REG + CONFIG, 0x0f,W_RF);   
         CE_Pin(1,W_RF);   break;     
       case 3:
@@ -363,10 +363,10 @@ void RX_Mode(unsigned char W_RF)
 	SPI_Write_Buf(RF_WRITE_REG + RX_ADDR_P0, TX_ADDRESS3, RX_ADR_WIDTH,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + EN_AA, ENAA_P0,W_RF); 
 	SPI_RW_Reg(RF_WRITE_REG + SETUP_RETR,0x1a,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //Ê¹ÄÜÍ¨µÀ0µÄ½ÓÊÕµØÖ· 
-	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 10,W_RF);        //ÉèÖÃRFÍ¨µÀÎª2.400GHz  ÆµÂÊ=2.4+0GHz
+	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01,W_RF);  //ä½¿èƒ½é€šé“0çš„æŽ¥æ”¶åœ°å€ 
+	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 10,W_RF);        //è®¾ç½®RFé€šé“ä¸º2.400GHz  é¢‘çŽ‡=2.4+0GHz
 	SPI_RW_Reg(RF_WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH,W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //ÉèÖÃTX·¢Éä²ÎÊý,0dbÔöÒæ,2Mbps,µÍÔëÉùÔöÒæ¿ªÆô
+	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F,W_RF);   //è®¾ç½®TXå‘å°„å‚æ•°,0dbå¢žç›Š,2Mbps,ä½Žå™ªå£°å¢žç›Šå¼€å¯
 	SPI_RW_Reg(RF_WRITE_REG + CONFIG, 0x0f,W_RF);   
         CE_Pin(1,W_RF);   break;     
      
@@ -400,9 +400,9 @@ void TX_Mode(unsigned char W_RF)
         SPI_RW_Reg(RF_WRITE_REG + SETUP_RETR,0x0a, W_RF);       
         
 	SPI_RW_Reg(RF_WRITE_REG + EN_RXADDR, 0x01, W_RF);  
-	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 20, W_RF);        
+	SPI_RW_Reg(RF_WRITE_REG + RF_CH, 50, W_RF);        
 	SPI_RW_Reg(RF_WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH, W_RF); 
-	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F, W_RF);   //ÉèÖÃTX·¢Éä²ÎÊý,0dbÔöÒæ,2Mbps,µÍÔëÉùÔöÒæ¿ªÆô 
+	SPI_RW_Reg(RF_WRITE_REG + RF_SETUP, 0x0F, W_RF);   //è®¾ç½®TXå‘å°„å‚æ•°,0dbå¢žç›Š,2Mbps,ä½Žå™ªå£°å¢žç›Šå¼€å¯ 
 	SPI_RW_Reg(RF_WRITE_REG + CONFIG, 0x0e, W_RF);   
 	CE_Pin(1, W_RF);
 
@@ -424,7 +424,7 @@ void nRF24L01_Init(unsigned char Mode,unsigned char W_RF)
 	if(Mode == nRF_TX_Mode)
 		TX_Mode(W_RF);
 	else RX_Mode(W_RF);
-	delay_1ms(2);//24L01 µôµçÄ£Ê½µ½´ý»úÄ£Ê½ÐèÒª1.5ms
+	delay_1ms(2);//24L01 æŽ‰ç”µæ¨¡å¼åˆ°å¾…æœºæ¨¡å¼éœ€è¦1.5ms
 }
 
 
@@ -454,7 +454,7 @@ void nRF24L01_Revceive(unsigned char W_RF)
 			SPI_Read_Buf(RD_RX_PLOAD, NRF_rx_buf, RX_PLOAD_WIDTH, W_RF);
 			SPI_RW_Reg(FLUSH_RX, 0xff, W_RF);
                       //  if(NRF_rx_buf[0]==0x1f)
-//                         { TimeFalg.get_pp_time1=__HAL_TIM_GET_COUNTER(&htim4);//»ñÈ¡¶¨Ê±Æ÷µÄ¼ÆÊýÊ±¼ä
+//                         { TimeFalg.get_pp_time1=__HAL_TIM_GET_COUNTER(&htim4);//èŽ·å–å®šæ—¶å™¨çš„è®¡æ•°æ—¶é—´
 //                           TimeFalg.get_pp_temp++;
 //                           if(TimeFalg.get_pp_temp>=3)
 //                           {TimeFalg.get_pp_temp=0;
@@ -473,7 +473,7 @@ void nRF24L01_Revceive(unsigned char W_RF)
 			SPI_Read_Buf(RD_RX_PLOAD, NRF_rx_buf1, RX_PLOAD_WIDTH, W_RF);
 			SPI_RW_Reg(FLUSH_RX, 0xff, W_RF);
                     //    if(NRF_rx_buf1[0]==0x1f)
-//                         { TimeFalg.get_pp_time2=__HAL_TIM_GET_COUNTER(&htim4);//»ñÈ¡¶¨Ê±Æ÷µÄ¼ÆÊýÊ±¼ä
+//                         { TimeFalg.get_pp_time2=__HAL_TIM_GET_COUNTER(&htim4);//èŽ·å–å®šæ—¶å™¨çš„è®¡æ•°æ—¶é—´
 //                           
 //                           TimeFalg.get_pp_temp++;
 //                           if(TimeFalg.get_pp_temp>=3)
@@ -496,7 +496,7 @@ void nRF24L01_Revceive(unsigned char W_RF)
 			SPI_Read_Buf(RD_RX_PLOAD, NRF_rx_buf2, RX_PLOAD_WIDTH, W_RF);
 			SPI_RW_Reg(FLUSH_RX, 0xff, W_RF);
                  //       if(NRF_rx_buf2[0]==0x1f)
-//                         { TimeFalg.get_pp_time3=__HAL_TIM_GET_COUNTER(&htim4);//»ñÈ¡¶¨Ê±Æ÷µÄ¼ÆÊýÊ±¼ä
+//                         { TimeFalg.get_pp_time3=__HAL_TIM_GET_COUNTER(&htim4);//èŽ·å–å®šæ—¶å™¨çš„è®¡æ•°æ—¶é—´
 //                           TimeFalg.get_pp_temp++;
 //                           if(TimeFalg.get_pp_temp>=3)
 //                           {TimeFalg.get_pp_temp=0;
@@ -512,11 +512,11 @@ void nRF24L01_Revceive(unsigned char W_RF)
 
 }
 /*
- * º¯ÊýÃû£ºNRF_Check
- * ÃèÊö  £ºÖ÷ÒªÓÃÓÚNRFÓëMCUÊÇ·ñÕý³£Á¬½Ó
- * ÊäÈë  £ºÎÞ	
- * Êä³ö  £ºSUCCESS/ERROR Á¬½ÓÕý³£/Á¬½ÓÊ§°Ü
- * µ÷ÓÃ  £ºÍâ²¿µ÷ÓÃ
+ * å‡½æ•°åï¼šNRF_Check
+ * æè¿°  ï¼šä¸»è¦ç”¨äºŽNRFä¸ŽMCUæ˜¯å¦æ­£å¸¸è¿žæŽ¥
+ * è¾“å…¥  ï¼šæ— 	
+ * è¾“å‡º  ï¼šSUCCESS/ERROR è¿žæŽ¥æ­£å¸¸/è¿žæŽ¥å¤±è´¥
+ * è°ƒç”¨  ï¼šå¤–éƒ¨è°ƒç”¨
  */
 uchar NRF_Check(unsigned char W_RF)
 {
@@ -525,13 +525,13 @@ uchar NRF_Check(unsigned char W_RF)
 	uchar i; 
         
 CE_Pin(0, W_RF);	 
-	/*Ð´Èë5¸ö×Ö½ÚµÄµØÖ·.  */  
+	/*å†™å…¥5ä¸ªå­—èŠ‚çš„åœ°å€.  */  
 	SPI_Write_Buf(RF_WRITE_REG+TX_ADDR,buf,5, W_RF);
 
-	/*¶Á³öÐ´ÈëµÄµØÖ· */
+	/*è¯»å‡ºå†™å…¥çš„åœ°å€ */
 	SPI_Read_Buf(TX_ADDR,buf1,5, W_RF); 
 	 
-CE_Pin(1, W_RF);	/*±È½Ï*/               
+CE_Pin(1, W_RF);	/*æ¯”è¾ƒ*/               
 	for(i=0;i<5;i++)
 	{       
 		if(buf1[i]!=0xFF)
@@ -539,9 +539,9 @@ CE_Pin(1, W_RF);	/*±È½Ï*/
 	} 
 	       
 	if(i==5)
-		return 1 ;        //MCUÓëNRF³É¹¦Á¬½Ó 
+		return 1 ;        //MCUä¸ŽNRFæˆåŠŸè¿žæŽ¥ 
 	else
-		return 0 ;        //MCUÓëNRF²»Õý³£Á¬½Ó
+		return 0 ;        //MCUä¸ŽNRFä¸æ­£å¸¸è¿žæŽ¥
               
 }
 /*

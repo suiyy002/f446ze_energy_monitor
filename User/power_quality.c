@@ -1,12 +1,13 @@
-#include "analysis.h"
+#include "power_quality.h"
 #include "math.h"
 #include "fft.h"
-
-#define VOL_STD_RMS_A  3.950780771168715722E+4
-#define VOL_STD_RMS_B  3.950780771168715722E+4
-#define VOL_STD_RMS_C  3.951002815712404111E+4
-
-#define VOL_STD_FACTOR 2345
+#include "cmsis_os.h"
+/* 57/180*3.53 volt */
+#define VOL_STD_RMS_A  1.11783333333333
+#define VOL_STD_RMS_B  1.11783333333333
+#define VOL_STD_RMS_C  1.11783333333333
+/* 180/3.53 transformer ratio */
+#define VOL_STD_FACTOR 50.9915014164305949
 #define PI_ 3.141592654
 extern uint8_t AD_save_flag, AD_save_flag1;
 
@@ -34,54 +35,58 @@ extern float fft_harmonicC_output[]; //FFT 输出数组
 
 uint16_t AD_RMS_Time = 0;
 
-double AD_data0 = 0, AD_data1 = 0, AD_data2 = 0;
+double AD_data_sum[3];
 
 double ad_RMS[3][10] = {0}; // 全局数组，三相电压均方根数组
-float LOGIC_RMS[3] = {0};
 
 /********************电压有效值************************************/
 /* 每个周期（20ms）采集128个点，这样的话，所需定时器的频率为128*50Hz=6400Hz，即为TIM4频率 */
-void Voltage_RMS_Calc(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[])
+void Voltage_RMS_Calc(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[], float buf[])
 {
+    float tmp[3] = {0};
     uint16_t i = 0, j = 0, k = 0;
-    /* 采了10组128个点 */
     for (j = 0; j < 10; j++) 
     {
         k = j * 128;
         for (i = 0; i < 128; i++) 
         {
-            LOGIC_RMS[0] = (float) *(ad1 + k + i);
-            LOGIC_RMS[1] = (float) *(ad2 + k + i);
-            LOGIC_RMS[2] = (float) *(ad3 + k + i);
-            //if((ad0>35500)|(ad0<35500)){flag_a0++;}//电压暂升、暂降、短时中断
-            // if((ad0>35500)|(ad0<35500)){flag_a1++;}
-            //if((ad0>35500)|(ad0<35500)){flag_a2++;}
-            AD_data0 = pow(LOGIC_RMS[0], 2) + AD_data0;
-            AD_data1 = pow(LOGIC_RMS[1], 2) + AD_data1;
-            AD_data2 = pow(LOGIC_RMS[2], 2) + AD_data2;
+            tmp[0] = (float) *(ad1 + k + i);
+            tmp[1] = (float) *(ad2 + k + i);
+            tmp[2] = (float) *(ad3 + k + i);
+
+            AD_data_sum[0] += pow(tmp[0], 2);
+            AD_data_sum[1] += pow(tmp[1], 2);
+            AD_data_sum[2] += pow(tmp[2], 2);
         }
-        ad_RMS[0][j] = sqrt(AD_data0 / 128);
-        ad_RMS[1][j] = sqrt(AD_data1 / 128);
-        ad_RMS[2][j] = sqrt(AD_data2 / 128);
-        AD_data0 = 0;
-        AD_data1 = 0;
-        AD_data2 = 0;
+        ad_RMS[0][j] = sqrt(AD_data_sum[0] / 128);
+        ad_RMS[1][j] = sqrt(AD_data_sum[1] / 128);
+        ad_RMS[2][j] = sqrt(AD_data_sum[2] / 128);
+        for(i=0; i<3; i++)
+        {
+            AD_data_sum[i] = 0;
+        }
     }
-    LOGIC_RMS[0] = 0;
-    LOGIC_RMS[1] = 0;
-    LOGIC_RMS[2] = 0;
-    for (i = 0; i < 10; i++) 
+
+    // convert AD value to real voltage
+    for(j=0; j<10; j++)
     {
-        LOGIC_RMS[0] = LOGIC_RMS[0] + ad_RMS[0][i];
-        LOGIC_RMS[1] = LOGIC_RMS[1] + ad_RMS[1][i];
-        LOGIC_RMS[2] = LOGIC_RMS[2] + ad_RMS[2][i];
+        for(i=0; i<3; i++)
+        {
+            /* internal ref voltage & offset-binary code */
+            ad_RMS[i][j] = ((ad_RMS[i][j] > 32768.0) ? (ad_RMS[i][j] - 32768.0) : 0)
+            * 5.0 / 32768.0;
+        }
     }
-    LOGIC_RMS[0] = LOGIC_RMS[0] / 10;
-    LOGIC_RMS[1] = LOGIC_RMS[1] / 10;
-    LOGIC_RMS[2] = LOGIC_RMS[2] / 10;
-
-    //return  ad_RMS;
-
+    for(i=0; i<3; i++)
+    {
+        buf[i] = 0;
+        for(j=0; j<10; j++)
+        {
+            buf[i] += ad_RMS[i][j];
+        }
+        buf[i] /= 10.0;
+        buf[i] *= VOL_STD_FACTOR;
+    }
 }
 
 
@@ -93,16 +98,17 @@ void Voltage_RMS_Calc(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[])
 // p.u.是一个标幺值（per unit）的缩写。
 //比如，220v=1p.u. ，那么0.1个p.u.就是22v
 
-void LOGIC_zansheng_zanjiang_zhongduan(void)
+void Voltage_sag_swell_interruption(void)
 {
     for (uint8_t i = 0; i < 10; i++) 
     {
-//A
+        //A
         if (ad_RMS[0][i] > VOL_STD_RMS_A) 
         {
             if (((ad_RMS[0][i] - VOL_STD_RMS_A) > 0.1 * VOL_STD_RMS_A) && // >1.1p.u.
                 ((ad_RMS[0][i] - VOL_STD_RMS_A) < 0.8 * VOL_STD_RMS_A))  // <1.8p.u.
             {
+                __nop();
                 //todo: 根据AD_save_flag，进行波形存储发送  暂升
             }
         }
@@ -112,19 +118,22 @@ void LOGIC_zansheng_zanjiang_zhongduan(void)
                 ((VOL_STD_RMS_A - ad_RMS[0][i]) < 0.9 * VOL_STD_RMS_A)) // >0.1p.u.
             { 
                 //todo: 波形存储发送   暂降
+                __nop();
             }
             if (((VOL_STD_RMS_A - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_A)) 
             {
                 //todo: 波形存储发送   中断
+                __nop();
             }
         }
-//B  
+        //B  
         if (ad_RMS[1][i] > VOL_STD_RMS_B) 
         {
             if (((ad_RMS[1][i] - VOL_STD_RMS_B) > 0.1 * VOL_STD_RMS_B) &&
                 ((ad_RMS[1][i] - VOL_STD_RMS_B) < 0.8 * VOL_STD_RMS_B)) 
             {
                 //波形存储发送    暂升
+                __nop();
             }
         }
         else if (ad_RMS[01][i] < VOL_STD_RMS_B) 
@@ -133,20 +142,23 @@ void LOGIC_zansheng_zanjiang_zhongduan(void)
                 ((VOL_STD_RMS_B - ad_RMS[1][i]) < 0.9 * VOL_STD_RMS_B)) 
             {
                 //波形存储发送     暂降
+                __nop();
             }
 
             if (((VOL_STD_RMS_B - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_B)) 
             {
                 //波形存储发送    中断
+                __nop();
             }
         }
-//C  
+        //C  
         if (ad_RMS[2][i] > VOL_STD_RMS_C) 
         {
             if (((ad_RMS[2][i] - VOL_STD_RMS_C) > 0.1 * VOL_STD_RMS_C) &&
                 ((ad_RMS[2][i] - VOL_STD_RMS_C) < 0.8 * VOL_STD_RMS_C)) 
             {
                 //波形存储发送  暂升
+                __nop();
             }
         }
         else if (ad_RMS[2][i] < VOL_STD_RMS_C) 
@@ -155,10 +167,12 @@ void LOGIC_zansheng_zanjiang_zhongduan(void)
                 ((VOL_STD_RMS_C - ad_RMS[2][i]) < 0.9 * VOL_STD_RMS_C)) 
             {
                 //波形存储发送    暂降
+                __nop();
             }
             if (((VOL_STD_RMS_C - ad_RMS[0][i]) < 0.1 * VOL_STD_RMS_C)) 
             {
                 //波形存储发送   中断
+                __nop();
             }
         }
     }
@@ -176,13 +190,13 @@ void Voltage_Deviation_Calc(void)
 {
 
     for (uint8_t i = 0; i < 10; i++) {
-        Data_deviation[0][1] = ad_RMS[0][i] + Data_deviation[0][1];
-        Data_deviation[1][1] = ad_RMS[1][i] + Data_deviation[1][1];
-        Data_deviation[2][1] = ad_RMS[2][i] + Data_deviation[2][1];
+        Data_deviation[0][1] += ad_RMS[0][i];
+        Data_deviation[1][1] += ad_RMS[1][i];
+        Data_deviation[2][1] += ad_RMS[2][i];
     }
-    Data_deviation1[0][1] = Data_deviation[0][1] / 10;
-    Data_deviation1[1][1] = Data_deviation[1][1] / 10;
-    Data_deviation1[2][1] = Data_deviation[2][1] / 10;
+    Data_deviation1[0][1] /= 10;
+    Data_deviation1[1][1] /= 10;
+    Data_deviation1[2][1] /= 10;
 
     Data_deviation[0][1] = 0;
     Data_deviation[1][1] = 0;
@@ -278,7 +292,7 @@ void Get_50HZ_data(void)
 
 /***********************相位及频率计算********************************/
 
-
+#if 0
 uint16_t TIME_A[3] = {0},
          TIME_A1[3] = {0},
          TIME_B[3] = {0},
@@ -293,9 +307,6 @@ uint16_t TIME_DIFF_PHASE[3][2] = {0};
 
 uint16_t TIMER_BUFFER[3] = {0}; /* 数据采集次计数变量 */
 //uint16_t  TIM7_CNT_OLD, TIM7_CNT_NOW, TIM7_UPDATE_CNT;
-float freq_tab[3];
-float phase_tab_ang[3];
-float phase_tab_rad[3];
 static uint8_t
     TIMER_TEMP = 0,
     TIMER_PEMP[3][2] = {0};
@@ -308,34 +319,38 @@ static uint16_t TIME_DIFF_PHASE_DATA[3][2] = {0},
 
 static uint32_t aassd = 0;
 volatile uint8_t deviation_diff = 200;
+#endif
+float freq_tab[3];
+float phase_tab_ang[3];
+float phase_tab_rad[3];
+
 
 /********************数据计算***************************************/
-
+float rms_tab[3];
 void data_process(void)
 {
     if (0x01 == AD_TEMP_flag) {
         AD_TEMP_flag = 0;
-        // if (0x01 == AD_save_flag) {
-        //     Harmonic_calculation_FFT(AD_03_dataupper, A_line);
-        //     Harmonic_calculation_FFT(AD_02_dataupper, B_line);
-        //     Harmonic_calculation_FFT(AD_01_dataupper, C_line);
-        // }
-        // if (0x00 == AD_save_flag) {
-        //     Harmonic_calculation_FFT(AD_03_datalower, A_line);
-        //     Harmonic_calculation_FFT(AD_02_datalower, B_line);
-        //     Harmonic_calculation_FFT(AD_01_datalower, C_line);
-        // }
+        if (0x01 == AD_save_flag) {
+            Harmonic_calculation_FFT(AD_03_dataupper, A_line);
+            Harmonic_calculation_FFT(AD_02_dataupper, B_line);
+            Harmonic_calculation_FFT(AD_01_dataupper, C_line);
+        }
+        if (0x00 == AD_save_flag) {
+            Harmonic_calculation_FFT(AD_03_datalower, A_line);
+            Harmonic_calculation_FFT(AD_02_datalower, B_line);
+            Harmonic_calculation_FFT(AD_01_datalower, C_line);
+        }
 
         // HAL_Delay(1);
         if (0x01 == AD_save_flag)
             Voltage_RMS_Calc(AD_01_dataupper,
-                AD_02_dataupper, AD_03_dataupper);
+                AD_02_dataupper, AD_03_dataupper, rms_tab);
         if (0x00 == AD_save_flag)
             Voltage_RMS_Calc(AD_01_datalower,
-                AD_02_datalower, AD_03_datalower);
-        //计算后会存储到ad_RMS里面
+                AD_02_datalower, AD_03_datalower, rms_tab);
         // HAL_Delay(1);
-        // LOGIC_zansheng_zanjiang_zhongduan(); //电压暂升暂降 短时中断
+        // Voltage_sag_swell_interruption(); //电压暂升暂降 短时中断
         // Voltage_Deviation_Calc();                 //电压偏差
     }
 

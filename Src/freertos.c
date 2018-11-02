@@ -56,14 +56,38 @@
 #include "stm32f4xx_hal.h"
 #include "freq_cap.h"
 #include "tim.h"
-#include "analysis.h"
+#include "power_quality.h"
+#include "nrf24l01_reg.h"
+#include "nrf24l01.h"
+#include "delay.h"
+#include "w25q64.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
 
 /* USER CODE BEGIN Variables */
+#define dbg_w25q64
+#define dbg_nrf
 
+osThreadId nrfTaskHandle;
+
+union _dgb_flg
+{
+  uint8_t flg_total;
+  struct _flg_t
+  {
+    uint8_t nrf_send : 1;
+    uint8_t nrf_rev : 1;
+    uint8_t nrf_err : 1;
+    uint8_t w25q64_err : 1;
+    uint8_t nrf_send1 : 1;
+    uint8_t nrf_send2 : 1;
+    uint8_t nrf_send3 : 1;
+    uint8_t nrf_send4 : 1;
+  }flg;
+
+}dgb_flg;
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -72,6 +96,8 @@ void StartDefaultTask(void const * argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* USER CODE BEGIN FunctionPrototypes */
+void StartNrfTask(void const * arg);
+static void nrf_send(uint8_t *txbuf, uint8_t size);
 
 /* USER CODE END FunctionPrototypes */
 
@@ -99,10 +125,12 @@ void MX_FREERTOS_Init(void) {
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  // defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  osThreadDef(nrfTask, StartNrfTask, osPriorityNormal, 0, 128);
+ nrfTaskHandle = osThreadCreate(osThread(nrfTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -115,7 +143,6 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-
   /* Infinite loop */
   for(;;)
   {
@@ -155,7 +182,60 @@ void StartDefaultTask(void const * argument)
 }
 
 /* USER CODE BEGIN Application */
-     
+
+/* nrf wrapper */
+static void nrf_send(uint8_t *txbuf, uint8_t size)
+{
+  static uint8_t NRF_tx_buf[32] = {0};
+  TX_Mode(0);
+  delay_ms(1);
+  if(size > 31)
+    size = 31;
+  NRF_tx_buf[0] = size;
+  for(uint8_t i = 0; i < size; i++)
+    NRF_tx_buf[i+1] = txbuf[i];
+  SPI_Write_Buf(WR_TX_PLOAD, NRF_tx_buf, 32, 0);
+  delay_ms(1);
+  CLEAR_AD_Data(0);
+  RX_Mode(0);
+  delay_ms(1);
+}
+uint8_t readbuf[4];
+void StartNrfTask(void const * arg)
+{
+  // enable w25q64   
+  w25q64_init();
+  // initialization of nrf24
+  while(!NRF_Check(0))
+  {
+    dgb_flg.flg.nrf_err = 1;
+  }
+  dgb_flg.flg.nrf_err = 0;
+  uint8_t testbuf[5] = {'1', '2', '3', '4', '\n'};
+  SpiFlash_Write_Data(testbuf, 1, 1, 4);
+  osDelay(2);
+  SpiFlash_Read_Data(readbuf, 1, 1, 4);
+  osDelay(2);
+  for(int i=0; i<4; i++)
+  {
+    if(testbuf[i] != readbuf[i])
+    {
+      dgb_flg.flg.w25q64_err = 1;
+      break;
+    }
+  }
+  for(;;)
+  {
+    // do something
+    if(dgb_flg.flg.nrf_send)
+    {
+      nrf_send(testbuf, sizeof(testbuf));
+      // dgb_flg.flg.nrf_send = 0;
+    }
+    nRF24L01_Revceive(0);
+    osDelay(5);
+  }
+}
 /* USER CODE END Application */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

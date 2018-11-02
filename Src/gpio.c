@@ -91,7 +91,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOG, AD_RD_Pin|AD_CS_Pin|AD_WR_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, W25Q64_CS_Pin|W25Q64_DI_Pin|W25Q64_CLK_Pin|W25Q64_HOLD_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, W25Q64_DO_Pin|W25Q64_CS_Pin|W25Q64_CLK_Pin|W25Q64_HOLD_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PAPin PAPin PAPin PAPin */
   GPIO_InitStruct.Pin = RF_CE_Pin|RF_CSN_Pin|RF_SCK_Pin|RF_MOSI_Pin;
@@ -126,7 +126,7 @@ void MX_GPIO_Init(void)
                            PDPin */
   GPIO_InitStruct.Pin = AD_DB5_Pin|AD_DB6_Pin|AD_DB7_Pin|AD_DB8_Pin 
                           |AD_DB9_Pin|AD_DB10_Pin|AD_DB11_Pin|AD_DB12_Pin 
-                          |W25Q64_DO_Pin;
+                          |W25Q64_DI_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
@@ -151,7 +151,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPS_INT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PDPin PDPin PDPin PDPin */
-  GPIO_InitStruct.Pin = W25Q64_CS_Pin|W25Q64_DI_Pin|W25Q64_CLK_Pin|W25Q64_HOLD_Pin;
+  GPIO_InitStruct.Pin = W25Q64_DO_Pin|W25Q64_CS_Pin|W25Q64_CLK_Pin|W25Q64_HOLD_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

@@ -102,8 +102,8 @@ void getADdata(void) {   // unsigned int i=0;
     }
 
     // todo ??????????
-    if (AD_data[3] >= 0x8000) { AD_data[3] = AD_data[3] - 0x8000; }
-    else if (AD_data[3] < 0x8000) { AD_data[3] = 0x8000 - AD_data[3]; }
+//    if (AD_data[3] >= 0x8000) { AD_data[3] = AD_data[3] - 0x8000; }
+//    else if (AD_data[3] < 0x8000) { AD_data[3] = 0x8000 - AD_data[3]; }
 
 /******************??FFT????????***************************/
     // AD_00_data[AD_TEMP_data]=AD_data[0];
@@ -166,8 +166,9 @@ void Configuration_AD_register(void) {
 
     AD_CR0_OUTPUT_1;    // sample immediately after last convertion, rising edge at CONVST start the convertion 
     AD_CR1_OUTPUT_0;    // must be 0
+    AD_CR2_OUTPUT_1;    // complement binary code
     AD_CR2_OUTPUT_0;    // shifted binary code
-    AD_CR3_OUTPUT_0;    // external voltage ref
+    AD_CR3_OUTPUT_0;    // internal voltage ref
 
     MAX11046_delay(10);
     AD_WR_OUTPUT_1;     // high for saving the config
@@ -182,6 +183,7 @@ void AD_IO_INIT(void) {
     AD_CONVST_OUTPUT_1;  // not sampling
 
 }
+
 
 
 

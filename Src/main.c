@@ -56,7 +56,7 @@
 
 /* USER CODE BEGIN Includes */
 #include "freq_cap.h"
-#include "analysis.h"
+#include "power_quality.h"
 #include "max11046.h"
 /* USER CODE END Includes */
 
@@ -255,6 +255,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     {
       pfreq->cap_last[1] = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_3);
       pfreq->freq_bgn_flg[1] = 1;
+
       if(pfreq->phase_bgn_flg[1] == 0)
       {
         pfreq->phase[1] = pfreq->cap_last[1];
@@ -274,15 +275,15 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
       pfreq->freq_ready[1] = 1;
     }
   }
-  else if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) ////todo: if this one triggered first, there will be a problem
+  else if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
   {
-    if(pfreq->freq_bgn_flg[2] == 0 && pfreq->freq_bgn_flg[0] == 1 && pfreq->freq_bgn_flg[1] == 1 )
+    if(pfreq->freq_bgn_flg[2] == 0)
     {
       pfreq->cap_last[2] = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_2);
+      pfreq->freq_bgn_flg[2] = 1;
 
-      if(1)
+      if(1 && pfreq->phase_bgn_flg[0] == 1 && pfreq->phase_bgn_flg[1] == 1)
       {
-        pfreq->freq_bgn_flg[2] = 1;
         pfreq->phase[2] = pfreq->cap_last[2];
         for(uint8_t i=0; i<3; i++)
         {
@@ -324,8 +325,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     getADdata();
   }
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM14) 
-  {
+  if (htim->Instance == TIM14) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */

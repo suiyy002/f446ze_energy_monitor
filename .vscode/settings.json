@@ -9,6 +9,11 @@
         "list.h": "c",
         "stddef.h": "c",
         "math.h": "c",
-        "analysis.h": "c"
+        "analysis.h": "c",
+        "nrf24l01_reg.h": "c",
+        "freq_cap.h": "c",
+        "tim.h": "c",
+        "main.h": "c",
+        "w25q64.h": "c"
     }
 }

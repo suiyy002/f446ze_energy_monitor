@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F446xx,ARM_MATH_CM4</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;   ../Drivers/STM32F4xx_HAL_Driver/Inc;   ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;   ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;   ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;   ../Middlewares/Third_Party/FreeRTOS/Source/include;   ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;   ../Drivers/CMSIS/Include;   ..\User</IncludePath>
+              <IncludePath>../Inc;    ../Drivers/STM32F4xx_HAL_Driver/Inc;    ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;    ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;    ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;    ../Middlewares/Third_Party/FreeRTOS/Source/include;    ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;    ../Drivers/CMSIS/Include;    ..\User</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -413,16 +413,6 @@
               <FilePath>..\User\max11046.h</FilePath>
             </File>
             <File>
-              <FileName>analysis.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\analysis.c</FilePath>
-            </File>
-            <File>
-              <FileName>analysis.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\User\analysis.h</FilePath>
-            </File>
-            <File>
               <FileName>fft.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\fft.c</FilePath>
@@ -461,6 +451,16 @@
               <FileName>arm_cortexM4lf_math.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\User\arm_cortexM4lf_math.lib</FilePath>
+            </File>
+            <File>
+              <FileName>power_quality.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\power_quality.c</FilePath>
+            </File>
+            <File>
+              <FileName>power_quality.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\power_quality.h</FilePath>
             </File>
           </Files>
         </Group>

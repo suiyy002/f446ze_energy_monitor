@@ -1,5 +1,5 @@
 /*****************************************
-¹¦ÄÜ£ºNRF24L01ÉäÆµÄ£¿éÍ·ÎÄ¼þ
+ï¿½ï¿½ï¿½Ü£ï¿½NRF24L01ï¿½ï¿½ÆµÄ£ï¿½ï¿½Í·ï¿½Ä¼ï¿½
 *****************************************/
 #ifndef _NRF24L01_H_
 #define _NRF24L01_H_
@@ -8,11 +8,11 @@ typedef unsigned char     BYTE;
 
 #define uchar unsigned char
 
-//24L01·¢ËÍ½ÓÊÕÊý¾Ý¿í¶È¶¨Òå
-#define TX_ADR_WIDTH    5   //5×Ö½ÚµÄµØÖ·¿í¶È
-#define RX_ADR_WIDTH    5   //5×Ö½ÚµÄµØÖ·¿í¶È
-#define TX_PLOAD_WIDTH  32  //32×Ö½ÚµÄÓÃ»§Êý¾Ý¿í¶È
-#define RX_PLOAD_WIDTH  32  //32×Ö½ÚµÄÓÃ»§Êý¾Ý¿í¶È
+//24L01ï¿½ï¿½ï¿½Í½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½È¶ï¿½ï¿½ï¿½
+#define TX_ADR_WIDTH    5   //5ï¿½Ö½ÚµÄµï¿½Ö·ï¿½ï¿½ï¿½
+#define RX_ADR_WIDTH    5   //5ï¿½Ö½ÚµÄµï¿½Ö·ï¿½ï¿½ï¿½
+#define TX_PLOAD_WIDTH  32  //32ï¿½Ö½Úµï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½
+#define RX_PLOAD_WIDTH  32  //32ï¿½Ö½Úµï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½
 
 
 #define nRF_TX_Mode	0x00
@@ -55,10 +55,10 @@ typedef unsigned char     BYTE;
 #define RX_PW_P5        	0x16  // 'RX payload width, pipe5' register address
 #define FIFO_STATUS	0x17  // 'FIFO Status Register' register address
 //========================
-/******   STATUS¼Ä´æÆ÷bitÎ»¶¨Òå      *******/
-#define MAX_RT  	0x10  //´ïµ½×î´ó·¢ËÍ´ÎÊýÖÐ¶Ï
-#define TX_OK   	0x20  //TX·¢ËÍÍê³ÉÖÐ¶Ï
-#define RX_OK   	0x40  //½ÓÊÕµ½Êý¾ÝÖÐ¶Ï
+/******   STATUSï¿½Ä´ï¿½ï¿½ï¿½bitÎ»ï¿½ï¿½ï¿½ï¿½      *******/
+#define MAX_RT  	0x10  //ï¿½ïµ½ï¿½ï¿½ï¿½ï¿½Í´ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+#define TX_OK   	0x20  //TXï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+#define RX_OK   	0x40  //ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
 /**************************************************/
 
 ///===============REG setting data===============
@@ -71,7 +71,7 @@ typedef unsigned char     BYTE;
 #define PWR_UP		0x02// 1---power up,0---power down
 #define PRIM_RX		0x01// 1---RX mode,0---TX mode
 //===0x01 EN_AA================
-//Ê¹ÄÜ×ÔÏìÓ¦Í¨µÀ£¬Ä¬ÈÏ5Í¨µÀÈ«¿ª
+//Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦Í¨ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½ï¿½5Í¨ï¿½ï¿½È«ï¿½ï¿½
 #define ENAA_P5		0x20
 #define ENAA_P4		0x10
 #define ENAA_P3		0x08
