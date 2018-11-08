@@ -4,7 +4,6 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-
                 "${workspaceFolder}/Drivers/STM32F4xx_HAL_Driver/Inc",
                 "${workspaceFolder}/Drivers/CMSIS/Include",
                 "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F4xx/Include",
@@ -16,7 +15,8 @@
                 "${workspaceFolder}/User",
                 "D:\\app\\GNU Tools Arm Embedded\\7 2018-q2-update\\arm-none-eabi\\include",
                 "D:\\app\\GNU Tools Arm Embedded\\7 2018-q2-update\\arm-none-eabi\\include\\sys",
-                "D:\\app\\GNU Tools Arm Embedded\\7 2018-q2-update\\lib\\gcc\\arm-none-eabi\\7.3.1\\include"            ],
+                "D:\\app\\GNU Tools Arm Embedded\\7 2018-q2-update\\lib\\gcc\\arm-none-eabi\\7.3.1\\include"            
+            ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",

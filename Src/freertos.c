@@ -61,6 +61,7 @@
 #include "nrf24l01.h"
 #include "delay.h"
 #include "w25q64.h"
+#include "protocol.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -88,6 +89,7 @@ union _dgb_flg
   }flg;
 
 }dgb_flg;
+extern float rms_tab[];
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -125,12 +127,12 @@ void MX_FREERTOS_Init(void) {
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  // defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  osThreadDef(nrfTask, StartNrfTask, osPriorityNormal, 0, 128);
- nrfTaskHandle = osThreadCreate(osThread(nrfTask), NULL);
+//  osThreadDef(nrfTask, StartNrfTask, osPriorityLow, 0, 128);
+//  nrfTaskHandle = osThreadCreate(osThread(nrfTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -141,17 +143,27 @@ void MX_FREERTOS_Init(void) {
 /* StartDefaultTask function */
 void StartDefaultTask(void const * argument)
 {
-
   /* USER CODE BEGIN StartDefaultTask */
+  
+  // start capture
+  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
   /* Infinite loop */
   for(;;)
   {
     data_process();
-    osDelay(15);
+    osDelay(50);
     // 2 avoid conflict with default value 0
-    if(pfreq->phase_bgn_flg[0] == 2
-      && pfreq->phase_bgn_flg[1] == 2
-      && pfreq->phase_bgn_flg[2] == 2)
+    #if 0
+    if
+    (1
+     && pfreq->phase_bgn_flg[0] == 2
+     && pfreq->phase_bgn_flg[1] == 2
+     && pfreq->phase_bgn_flg[2] == 2
+    )
     {
       pfreq->phase_us[0] = (pfreq->phase[1] >= pfreq->phase[0]
         ? (pfreq->phase[1] - pfreq->phase[0] + pfreq->period[0] * TIM_PERIOD)
@@ -165,10 +177,10 @@ void StartDefaultTask(void const * argument)
       for(uint8_t i=0; i<3; i++)
       {
         if(i==2)
-          pfreq->phase_ang[i] = 2 * PHASE_OFFSET_ANG + 
+          pfreq->phase_ang[i] =/* 2 * PHASE_OFFSET_ANG + */
           (pfreq->phase_us[i] / (TARGET_PERIOD * (TIM_FREQ / 1000000.0))) * 360.0;
         else
-          pfreq->phase_ang[i] = PHASE_OFFSET_ANG + 
+          pfreq->phase_ang[i] =/* PHASE_OFFSET_ANG + */
           (pfreq->phase_us[i] / (TARGET_PERIOD * (TIM_FREQ / 1000000.0))) * 360.0;
       }
       pfreq->phase_ready = 1;
@@ -177,6 +189,7 @@ void StartDefaultTask(void const * argument)
         pfreq->phase_bgn_flg[i] = 0;
       }
     }
+    #endif
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -229,10 +242,18 @@ void StartNrfTask(void const * arg)
     // do something
     if(dgb_flg.flg.nrf_send)
     {
-      nrf_send(testbuf, sizeof(testbuf));
-      // dgb_flg.flg.nrf_send = 0;
+//      nrf_send(testbuf, sizeof(testbuf));
+      dgb_flg.flg.nrf_send = 0;
+      for(uint8_t i=0; i<3; i++)
+      {
+        pfreq->freq[i] = 1;
+        pfreq->phase_ang[i] = 1;
+        rms_tab[i] = i;
+      }
+      nrf_send_shortframe_1();
+      
     }
-    nRF24L01_Revceive(0);
+//    nRF24L01_Revceive(0);
     osDelay(5);
   }
 }

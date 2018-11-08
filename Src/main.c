@@ -116,11 +116,7 @@ int main(void)
   AD_IO_INIT();
   Configuration_AD_register();
   HAL_Delay(10);
-  HAL_TIM_Base_Start_IT(&htim3);
-  HAL_TIM_Base_Start_IT(&htim4);
-  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
-  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
-  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -229,7 +225,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
         pfreq->phase[0] = pfreq->cap_last[0];
         pfreq->phase_bgn_flg[0] = 1;
       }
-
     }
     else
     {
@@ -255,7 +250,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     {
       pfreq->cap_last[1] = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_3);
       pfreq->freq_bgn_flg[1] = 1;
-
       if(pfreq->phase_bgn_flg[1] == 0)
       {
         pfreq->phase[1] = pfreq->cap_last[1];
@@ -281,16 +275,46 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     {
       pfreq->cap_last[2] = HAL_TIM_ReadCapturedValue(&htim3, TIM_CHANNEL_2);
       pfreq->freq_bgn_flg[2] = 1;
-
-      if(1 && pfreq->phase_bgn_flg[0] == 1 && pfreq->phase_bgn_flg[1] == 1)
-      {
+      if(pfreq->phase_bgn_flg[0] == 1 && pfreq->phase_bgn_flg[1] == 1)
+      {        
         pfreq->phase[2] = pfreq->cap_last[2];
-        for(uint8_t i=0; i<3; i++)
-        {
-          pfreq->phase_bgn_flg[i] = 2;
-        }
-      }
+        #if 1
+          /*
+            假设测量的时候接线顺序和时间随机，很有可能造成问题，导致测量不准确（定时器多出几个周期什么的）
+            对周期取模去除周期
+          */
+          pfreq->phase_us[0] = (pfreq->phase[1] >= pfreq->phase[0] ? 
+          (pfreq->phase[1] - pfreq->phase[0]) : 
+          ((pfreq->period[0] <= 1 ? 1 : pfreq->period[0]-1) * TIM_PERIOD) - pfreq->phase[0] + pfreq->phase[1]) % (uint32_t)(TIM_FREQ / pfreq->freq[0]);
+          pfreq->phase_us[1] = (pfreq->phase[2] >= pfreq->phase[1] ? 
+          (pfreq->phase[2] - pfreq->phase[1]) : 
+          ((pfreq->period[1] <= 1 ? 1 : pfreq->period[1]-1) * TIM_PERIOD) - pfreq->phase[1] + pfreq->phase[2]) % (uint32_t)(TIM_FREQ / pfreq->freq[1]);
+          pfreq->phase_us[2] = pfreq->phase_us[0] + pfreq->phase_us[1];
+          #if 0
+          if(pfreq->phase[0] < pfreq->phase[1]) pfreq->phase_us[0] = pfreq->phase[1] - pfreq->phase[0];
+          else pfreq->phase_us[0] = TIM_PERIOD + pfreq->phase[1] - pfreq->phase[0];
+          if(pfreq->phase[1] < pfreq->phase[2]) pfreq->phase_us[1] = pfreq->phase[2] - pfreq->phase[1];
+          else pfreq->phase_us[0] = TIM_PERIOD + pfreq->phase[2] - pfreq->phase[1];
+          pfreq->phase_us[2] = pfreq->phase_us[0] + pfreq->phase_us[1];
+          #endif
+          for(uint8_t i=0; i<3; i++)
+          {
+              pfreq->period[i] = 0;
 
+              // pfreq->phase_ang[i] = ((uint32_t)((pfreq->phase_us[i] / (TIM_FREQ / pfreq->freq[i])) * 3600000) % 3600000) / 10000.0;
+              pfreq->phase_ang[i] = (pfreq->phase_us[i] / (TIM_FREQ / pfreq->freq[i])) * 360.0;
+          }
+          pfreq->phase_ready = 1;
+          for(uint8_t i=0; i<3; i++)
+          {
+            pfreq->phase_bgn_flg[i] = 0;
+          }
+        #endif
+//        for(uint8_t i=0; i<3; i++)
+//        {
+//          pfreq->phase_bgn_flg[i] = 2;
+//        }
+      }
     }
     else
     {
@@ -329,25 +353,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  #if 0
-  else if(htim->Instance == TIM2)
-  {
-    if(pfreq->freq_bgn_flg[0] == 1)
-    {
-      pfreq->period[0]++;
-    }
-    else if(pfreq->freq_bgn_flg[1]  == 1)
-    {
-      pfreq->period[1]++;
-    }
-    else if(pfreq->freq_bgn_flg[2] == 1)
-    {
-      pfreq->period[2]++;
-    }
-    else;
-  }
-  #endif
-  else if(htim->Instance == TIM2)
+  #if 1
+  else if(htim->Instance == TIM3)
   {
     if(pfreq->phase_bgn_flg[0] == 1)
     {
@@ -357,7 +364,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     {
       pfreq->period[1]++;
     }
-    #if 0
+    
     else if(pfreq->phase_bgn_flg[2] == 1)
     {
       pfreq->period[2]++;

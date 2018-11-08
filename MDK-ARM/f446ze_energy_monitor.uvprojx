@@ -462,6 +462,16 @@
               <FileType>5</FileType>
               <FilePath>..\User\power_quality.h</FilePath>
             </File>
+            <File>
+              <FileName>protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\protocol.c</FilePath>
+            </File>
+            <File>
+              <FileName>protocol.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\protocol.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

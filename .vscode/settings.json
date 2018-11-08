@@ -15,6 +15,11 @@
         "tim.h": "c",
         "main.h": "c",
         "w25q64.h": "c",
-        "power_quality.h": "c"
+        "power_quality.h": "c",
+        "protocol.h": "c",
+        "delay.h": "c",
+        "nrf24l01.h": "c",
+        "stm32f4xx_hal.h": "c",
+        "queue.h": "c"
     }
 }

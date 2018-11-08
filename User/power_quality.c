@@ -2,13 +2,7 @@
 #include "math.h"
 #include "fft.h"
 #include "cmsis_os.h"
-/* 57/180*3.53 volt */
-#define VOL_STD_RMS_A  1.11783333333333
-#define VOL_STD_RMS_B  1.11783333333333
-#define VOL_STD_RMS_C  1.11783333333333
-/* 180/3.53 transformer ratio */
-#define VOL_STD_FACTOR 50.9915014164305949
-#define PI_ 3.141592654
+
 extern uint8_t AD_save_flag, AD_save_flag1;
 
 extern uint16_t AD_01_dataupper[2560];  //C
@@ -50,9 +44,9 @@ void Voltage_RMS_Calc(uint16_t ad3[], uint16_t ad2[], uint16_t ad1[], float buf[
         k = j * 128;
         for (i = 0; i < 128; i++) 
         {
-            tmp[0] = (float) *(ad1 + k + i);
-            tmp[1] = (float) *(ad2 + k + i);
-            tmp[2] = (float) *(ad3 + k + i);
+            tmp[0] = (float) *(ad1 + k + i); // A
+            tmp[1] = (float) *(ad2 + k + i); // B
+            tmp[2] = (float) *(ad3 + k + i); // C
 
             AD_data_sum[0] += pow(tmp[0], 2);
             AD_data_sum[1] += pow(tmp[1], 2);
@@ -292,34 +286,6 @@ void Get_50HZ_data(void)
 
 /***********************相位及频率计算********************************/
 
-#if 0
-uint16_t TIME_A[3] = {0},
-         TIME_A1[3] = {0},
-         TIME_B[3] = {0},
-         TIME_B1[3] = {0},
-         TIME_C[3] = {0},
-         TIME_C1[3] = {0};
-
-// [:][1] increases itself in tim7 routine
-uint16_t TIME_DIFF[3][2] = {0};
-// after [:][0] is set, it increases itself in tim7 interrupt routine
-uint16_t TIME_DIFF_PHASE[3][2] = {0};
-
-uint16_t TIMER_BUFFER[3] = {0}; /* 数据采集次计数变量 */
-//uint16_t  TIM7_CNT_OLD, TIM7_CNT_NOW, TIM7_UPDATE_CNT;
-static uint8_t
-    TIMER_TEMP = 0,
-    TIMER_PEMP[3][2] = {0};
-
-static uint16_t phase[3][10] = {0},
-                TIME_DIFF1[3][3][10] = {0};
-
-static uint16_t TIME_DIFF_PHASE_DATA[3][2] = {0},
-                TIME_DIFF_DATA[3][2] = {0};
-
-static uint32_t aassd = 0;
-volatile uint8_t deviation_diff = 200;
-#endif
 float freq_tab[3];
 float phase_tab_ang[3];
 float phase_tab_rad[3];
@@ -331,16 +297,16 @@ void data_process(void)
 {
     if (0x01 == AD_TEMP_flag) {
         AD_TEMP_flag = 0;
-        if (0x01 == AD_save_flag) {
-            Harmonic_calculation_FFT(AD_03_dataupper, A_line);
-            Harmonic_calculation_FFT(AD_02_dataupper, B_line);
-            Harmonic_calculation_FFT(AD_01_dataupper, C_line);
-        }
-        if (0x00 == AD_save_flag) {
-            Harmonic_calculation_FFT(AD_03_datalower, A_line);
-            Harmonic_calculation_FFT(AD_02_datalower, B_line);
-            Harmonic_calculation_FFT(AD_01_datalower, C_line);
-        }
+        // if (0x01 == AD_save_flag) {
+        //     Harmonic_calculation_FFT(AD_03_dataupper, A_line);
+        //     Harmonic_calculation_FFT(AD_02_dataupper, B_line);
+        //     Harmonic_calculation_FFT(AD_01_dataupper, C_line);
+        // }
+        // if (0x00 == AD_save_flag) {
+        //     Harmonic_calculation_FFT(AD_03_datalower, A_line);
+        //     Harmonic_calculation_FFT(AD_02_datalower, B_line);
+        //     Harmonic_calculation_FFT(AD_01_datalower, C_line);
+        // }
 
         // HAL_Delay(1);
         if (0x01 == AD_save_flag)

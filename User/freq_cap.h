@@ -8,8 +8,8 @@
 /* the frequency of the timer for capture */
 #define TIM_FREQ 1000000.0
 /* 20000us */
-#define TARGET_PERIOD 20000.0
-#define PHASE_OFFSET_ANG 5
+// #define TARGET_PERIOD 20000.0
+#define PHASE_OFFSET_ANG 0
 typedef struct T *T;
 struct T
 {
@@ -17,6 +17,7 @@ struct T
   uint32_t cap_last[3]; // old cap data
   
   float freq[3];
+//  float freq_filtered[3];
   uint32_t phase[3];
   uint32_t phase_us[3];
   float phase_ang[3];
