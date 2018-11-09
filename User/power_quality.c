@@ -177,64 +177,29 @@ void Voltage_sag_swell_interruption(void)
 /******************压偏差强调的是实际电压偏离系统标称电压的数值
 ，与偏差持续的时间无关。参考于《电能质量 供电电压偏差》
 GB/T 12325-2008************************************************/
-double Data_deviation[3][2];
-double Data_deviation1[3][2];
-// [:][1] for value, [:][0] for sign
+double Data_deviation[3];
+double Data_deviation1[3];
 void Voltage_Deviation_Calc(void)
 {
 
     for (uint8_t i = 0; i < 10; i++) {
-        Data_deviation[0][1] += ad_RMS[0][i];
-        Data_deviation[1][1] += ad_RMS[1][i];
-        Data_deviation[2][1] += ad_RMS[2][i];
+        Data_deviation[0] += ad_RMS[0][i];
+        Data_deviation[1] += ad_RMS[1][i];
+        Data_deviation[2] += ad_RMS[2][i];
     }
-    Data_deviation1[0][1] /= 10;
-    Data_deviation1[1][1] /= 10;
-    Data_deviation1[2][1] /= 10;
+    Data_deviation1[0] /= 10;
+    Data_deviation1[1] /= 10;
+    Data_deviation1[2] /= 10;
 
-    Data_deviation[0][1] = 0;
-    Data_deviation[1][1] = 0;
-    Data_deviation[2][1] = 0;
-    //A
-    if (Data_deviation1[0][1] > VOL_STD_RMS_A)  //正偏差
-    {
-        Data_deviation[0][1] = (Data_deviation1[0][1] - VOL_STD_RMS_A)
-                                / VOL_STD_RMS_A;
-        Data_deviation[0][0] = 1;
-    }
-    else if (Data_deviation1[0][1] < VOL_STD_RMS_A)//负偏差
-    {
-        Data_deviation[0][1] = (VOL_STD_RMS_A - Data_deviation1[0][1])
-                                / VOL_STD_RMS_A;
-        Data_deviation[0][0] = -1;
-    }
-    //B
-    if (Data_deviation1[1][1] > VOL_STD_RMS_B)  //正偏差
-    {
-        Data_deviation[1][1] = (Data_deviation1[1][1] - VOL_STD_RMS_B)
-                                / VOL_STD_RMS_B;
-        Data_deviation[0][0] = 1;
-    }
-    else if (Data_deviation1[1][1] < VOL_STD_RMS_B)//负偏差
-    {
-        Data_deviation[1][1] = (VOL_STD_RMS_B - Data_deviation1[1][1])
-                                / VOL_STD_RMS_B;
-        Data_deviation[0][0] = -1;
-    }
-    //C
-    if (Data_deviation1[2][1] > VOL_STD_RMS_C)  //正偏差
-    {
-        Data_deviation[2][1] = (Data_deviation1[2][1] - VOL_STD_RMS_C)
-                                / VOL_STD_RMS_C;
-        Data_deviation[0][0] = 1;
-    }
-    else if (Data_deviation1[2][1] < VOL_STD_RMS_C)//负偏差
-    {
-        Data_deviation[2][1] = (VOL_STD_RMS_C - Data_deviation1[2][1])
-                                / VOL_STD_RMS_C;
-        Data_deviation[0][0] = -1;
-    }
-    // 加个标志位
+    Data_deviation[0] = 0;
+    Data_deviation[1] = 0;
+    Data_deviation[2] = 0;
+    // A
+    Data_deviation[0] = (Data_deviation1[0] - VOL_STD_RMS_A) / VOL_STD_RMS_A;
+    // B
+    Data_deviation[1] = (Data_deviation1[1] - VOL_STD_RMS_B) / VOL_STD_RMS_B;
+    // C
+    Data_deviation[2] = (Data_deviation1[2] - VOL_STD_RMS_C) / VOL_STD_RMS_C;
 }
 
 
@@ -244,9 +209,9 @@ void Voltage_Deviation_Calc(void)
 IEEE中给出的典型电压波动范围为0.1%~7%，变化频率小于25Hz，
 电压的有效值的变化范围小于±10%。可参考《电能质量 电压波动与闪变》
 GB/T 12326-2008。**********************************************/
-void GET_LESSTHAN25Hz_data(void)//20ms取256个点，50分之一就是1秒取256个点进行FFT
+/* 采样点数为128，采样频率为6400/50Hz, Fn = (n-1)Hz，所以FFT计算出的数组只需要前25个数据 */
+void GET_LESSTHAN25Hz_data(void)
 {
-
     if (0x01 == AD_save_flag1) {
         Harmonic_calculation_FFT(flicker_03_dataupper, A_line);//谐波计算 a
         Harmonic_calculation_FFT(flicker_02_dataupper, B_line);//谐波计算 b
@@ -297,16 +262,16 @@ void data_process(void)
 {
     if (0x01 == AD_TEMP_flag) {
         AD_TEMP_flag = 0;
-        // if (0x01 == AD_save_flag) {
-        //     Harmonic_calculation_FFT(AD_03_dataupper, A_line);
-        //     Harmonic_calculation_FFT(AD_02_dataupper, B_line);
-        //     Harmonic_calculation_FFT(AD_01_dataupper, C_line);
-        // }
-        // if (0x00 == AD_save_flag) {
-        //     Harmonic_calculation_FFT(AD_03_datalower, A_line);
-        //     Harmonic_calculation_FFT(AD_02_datalower, B_line);
-        //     Harmonic_calculation_FFT(AD_01_datalower, C_line);
-        // }
+        if (0x01 == AD_save_flag) {
+            Harmonic_calculation_FFT(AD_03_dataupper, A_line);
+            Harmonic_calculation_FFT(AD_02_dataupper, B_line);
+            Harmonic_calculation_FFT(AD_01_dataupper, C_line);
+        }
+        if (0x00 == AD_save_flag) {
+            Harmonic_calculation_FFT(AD_03_datalower, A_line);
+            Harmonic_calculation_FFT(AD_02_datalower, B_line);
+            Harmonic_calculation_FFT(AD_01_datalower, C_line);
+        }
 
         // HAL_Delay(1);
         if (0x01 == AD_save_flag)

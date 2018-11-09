@@ -64,9 +64,9 @@ void Get_FFT_DATA(uint16_t *p)//傅里叶变换后得到的是信号峰值和频率
 void Harmonic_calculation_FFT(uint16_t *p, uint8_t id_)    //谐波计算
 {
     uint16_t i = 0;
-    double FFT_adder = 0;
-    /*uint16_t lklk=0;
-    uint8_t  Tttt_buf[32]={0x1f,0x01};*/
+    // double FFT_adder = 0;
+    // uint16_t lklk=0;
+    // uint8_t  Tttt_buf[32]={0x1f,0x01};
 
     arm_cfft_radix2_init_f32(&scfft2, FFT_LENGTH, 0, 1);
 
@@ -87,20 +87,20 @@ void Harmonic_calculation_FFT(uint16_t *p, uint8_t id_)    //谐波计算
 
     if (0x0A == id_) {
         arm_cmplx_mag_f32(fft_inputbuf, fft_harmonicA_output, FFT_LENGTH);
-        for (i = 1; i < 51; i++) { FFT_adder = FFT_adder + fft_harmonicA_output[i]; }
-        for (i = 1; i < 51; i++) { fft_harmonicA_output[i] = fft_harmonicA_output[i] / FFT_adder; }
+        // for (i = 1; i < 51; i++) { FFT_adder += fft_harmonicA_output[i]; }
+        // for (i = 1; i < 51; i++) { fft_harmonicA_output[i] /= FFT_adder; }
 
     }//把运算结果复数求模得幅值
     else if (0x0B == id_) {
         arm_cmplx_mag_f32(fft_inputbuf, fft_harmonicB_output, FFT_LENGTH);
-        for (i = 1; i < 51; i++) { FFT_adder = FFT_adder + fft_harmonicB_output[i]; }
-        for (i = 1; i < 51; i++) { fft_harmonicB_output[i] = fft_harmonicB_output[i] / FFT_adder; }
+        // for (i = 1; i < 51; i++) { FFT_adder += fft_harmonicB_output[i]; }
+        // for (i = 1; i < 51; i++) { fft_harmonicB_output[i] /= FFT_adder; }
 
     }//把运算结果复数求模得幅值
     else if (0x0C == id_) {
         arm_cmplx_mag_f32(fft_inputbuf, fft_harmonicC_output, FFT_LENGTH);
-        for (i = 1; i < 51; i++) { FFT_adder = FFT_adder + fft_harmonicC_output[i]; }
-        for (i = 1; i < 51; i++) { fft_harmonicC_output[i] = fft_harmonicC_output[i] / FFT_adder; }
+        // for (i = 1; i < 51; i++) { FFT_adder += fft_harmonicC_output[i]; }
+        // for (i = 1; i < 51; i++) { fft_harmonicC_output[i] /= FFT_adder; }
     }//把运算结果复数求模得幅值
 
 

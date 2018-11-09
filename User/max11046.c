@@ -122,7 +122,7 @@ void getADdata(void) {   // unsigned int i=0;
     AD_TEMP_data++;
     if (AD_TEMP_data >= 1280) {
         AD_TEMP_data = 0;
-        AD_TEMP_flag = 0x01;                // 1280 points enough
+        AD_TEMP_flag = 0x01;                // 1280 points sampled
         AD_save_flag++;
         //  HAL_TIM_Base_Stop_IT(&htim4);
         if (AD_save_flag >= 2) { AD_save_flag = 0; }
