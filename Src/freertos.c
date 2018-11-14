@@ -158,37 +158,37 @@ void StartDefaultTask(void const * argument)
     osDelay(50);
     // 2 avoid conflict with default value 0
     #if 0
-    if
-    (1
-     && pfreq->phase_bgn_flg[0] == 2
-     && pfreq->phase_bgn_flg[1] == 2
-     && pfreq->phase_bgn_flg[2] == 2
-    )
-    {
-      pfreq->phase_us[0] = (pfreq->phase[1] >= pfreq->phase[0]
-        ? (pfreq->phase[1] - pfreq->phase[0] + pfreq->period[0] * TIM_PERIOD)
-        : (TIM_PERIOD - pfreq->phase[0] + pfreq->phase[1]) 
-        + (pfreq->period[0] <= 1 ? 0 : pfreq->period[0]-1) * TIM_PERIOD);
-      pfreq->phase_us[1] = (pfreq->phase[2] >= pfreq->phase[1]
-        ? (pfreq->phase[2] - pfreq->phase[1] + pfreq->period[1] * TIM_PERIOD)
-        : (TIM_PERIOD - pfreq->phase[1] + pfreq->phase[2]) 
-        + (pfreq->period[1] <= 1 ? 0 : pfreq->period[1]-1) * TIM_PERIOD);
-      pfreq->phase_us[2] = pfreq->phase_us[0] + pfreq->phase_us[1];
-      for(uint8_t i=0; i<3; i++)
+      if
+      (1
+      && pfreq->phase_bgn_flg[0] == 2
+      && pfreq->phase_bgn_flg[1] == 2
+      && pfreq->phase_bgn_flg[2] == 2
+      )
       {
-        if(i==2)
-          pfreq->phase_ang[i] =/* 2 * PHASE_OFFSET_ANG + */
-          (pfreq->phase_us[i] / (TARGET_PERIOD * (TIM_FREQ / 1000000.0))) * 360.0;
-        else
-          pfreq->phase_ang[i] =/* PHASE_OFFSET_ANG + */
-          (pfreq->phase_us[i] / (TARGET_PERIOD * (TIM_FREQ / 1000000.0))) * 360.0;
+        pfreq->phase_us[0] = (pfreq->phase[1] >= pfreq->phase[0]
+          ? (pfreq->phase[1] - pfreq->phase[0] + pfreq->period[0] * TIM_PERIOD)
+          : (TIM_PERIOD - pfreq->phase[0] + pfreq->phase[1]) 
+          + (pfreq->period[0] <= 1 ? 0 : pfreq->period[0]-1) * TIM_PERIOD);
+        pfreq->phase_us[1] = (pfreq->phase[2] >= pfreq->phase[1]
+          ? (pfreq->phase[2] - pfreq->phase[1] + pfreq->period[1] * TIM_PERIOD)
+          : (TIM_PERIOD - pfreq->phase[1] + pfreq->phase[2]) 
+          + (pfreq->period[1] <= 1 ? 0 : pfreq->period[1]-1) * TIM_PERIOD);
+        pfreq->phase_us[2] = pfreq->phase_us[0] + pfreq->phase_us[1];
+        for(uint8_t i=0; i<3; i++)
+        {
+          if(i==2)
+            pfreq->phase_ang[i] =/* 2 * PHASE_OFFSET_ANG + */
+            (pfreq->phase_us[i] / (TARGET_PERIOD * (TIM_FREQ / 1000000.0))) * 360.0;
+          else
+            pfreq->phase_ang[i] =/* PHASE_OFFSET_ANG + */
+            (pfreq->phase_us[i] / (TARGET_PERIOD * (TIM_FREQ / 1000000.0))) * 360.0;
+        }
+        pfreq->phase_ready = 1;
+        for(uint8_t i=0; i<3; i++)
+        {
+          pfreq->phase_bgn_flg[i] = 0;
+        }
       }
-      pfreq->phase_ready = 1;
-      for(uint8_t i=0; i<3; i++)
-      {
-        pfreq->phase_bgn_flg[i] = 0;
-      }
-    }
     #endif
   }
   /* USER CODE END StartDefaultTask */
@@ -251,7 +251,6 @@ void StartNrfTask(void const * arg)
         rms_tab[i] = i;
       }
       nrf_send_shortframe_1();
-      
     }
 //    nRF24L01_Revceive(0);
     osDelay(5);

@@ -20,6 +20,8 @@
         "delay.h": "c",
         "nrf24l01.h": "c",
         "stm32f4xx_hal.h": "c",
-        "queue.h": "c"
-    }
+        "queue.h": "c",
+        "alg_findextrema.h": "c"
+    },
+    "python.pythonPath": "D:\\app\\Python\\Python37\\python.exe"
 }

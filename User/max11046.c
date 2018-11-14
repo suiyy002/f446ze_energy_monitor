@@ -29,7 +29,6 @@ void CRX_OUTPUT_INIT(void) {
     HAL_GPIO_Init(AD_DB0_GPIO_Port, &GPIO_InitStruct);
 }
 
-
 uint16_t get_DB_IO_DATA(void) {
     uint16_t DB_DATA = 0;
 
@@ -54,99 +53,65 @@ uint16_t get_DB_IO_DATA(void) {
 }
 
 
-uint16_t AD_00_data[1280] = {0};  //N
-uint16_t AD_01_dataupper[1280] = {0};  //C
-uint16_t AD_01_datalower[1280] = {0};  //C
-uint16_t AD_02_dataupper[1280] = {0};  //B
-uint16_t AD_02_datalower[1280] = {0};  //B
-uint16_t AD_03_dataupper[1280] = {0};  //A
-uint16_t AD_03_datalower[1280] = {0};  //A
+uint16_t AD_Data_A_0[128] = {0};  //C
+uint16_t AD_Data_A_1[128] = {0};  //C
+uint16_t AD_Data_B_0[128] = {0};  //B
+uint16_t AD_Data_B_1[128] = {0};  //B
+uint16_t AD_Data_C_0[128] = {0};  //A
+uint16_t AD_Data_C_1[128] = {0};  //A
 
-uint16_t flicker_01_dataupper[128] = {0};  //C
-uint16_t flicker_01_datalower[128] = {0};  //C
-uint16_t flicker_02_dataupper[128] = {0};  //B
-uint16_t flicker_02_datalower[128] = {0};  //B
-uint16_t flicker_03_dataupper[128] = {0};  //A
-uint16_t flicker_03_datalower[128] = {0};  //A
+uint16_t flicker_ADdata_A_0[128] = {0};
+uint16_t flicker_ADdata_A_1[128] = {0};
+uint16_t flicker_ADdata_B_0[128] = {0};
+uint16_t flicker_ADdata_B_1[128] = {0};
+uint16_t flicker_ADdata_C_0[128] = {0};
+uint16_t flicker_ADdata_C_1[128] = {0}; 
 
 uint8_t AD_save_flag = 0, AD_save_flag1 = 0;
 
 
-uint16_t AD_TEMP_data = 0;
-uint8_t flicker_TEMP = 0;
-uint16_t flicker_data = 0;
-uint8_t AD_TEMP_flag = 0, flicker_flag = 0;
+uint16_t AD_dat_cnt = 0;
+uint8_t AD_TEMP_flag = 0;
+uint16_t AD_data[8] = {0};
 
-void getADdata(void) {   // unsigned int i=0;
-
-    uint16_t AD_data[8] = {0};
-
+void getADdata(void) 
+{
     AD_CS_OUTPUT_1;
     AD_RD_OUTPUT_1;
     AD_WR_OUTPUT_1;
-
     AD_CONVST_OUTPUT_0;
-    // MAX11046_delay(10);
     AD_CONVST_OUTPUT_1;
-    // MAX11046_delay(100);
-    //  MAX11046_delay(10);
-    //  MAX11046_delay(100);
     AD_CONVST_OUTPUT_0;
-    //if(0 == AD_EOC_INUPT)
-    //{
     AD_CS_OUTPUT_0;
-    for (uint8_t i = 0; i < 8; i++) { //??????8?????
-        AD_RD_OUTPUT_0;                 // MAX11046_delay(10);
-        AD_data[i] = get_DB_IO_DATA();  //????????????????
-        AD_RD_OUTPUT_1;                 //  MAX11046_delay(10);
-    }
 
-    // todo ??????????
-//    if (AD_data[3] >= 0x8000) { AD_data[3] = AD_data[3] - 0x8000; }
-//    else if (AD_data[3] < 0x8000) { AD_data[3] = 0x8000 - AD_data[3]; }
-
-/******************??FFT????????***************************/
-    // AD_00_data[AD_TEMP_data]=AD_data[0];
-    if (0x00 == AD_save_flag) {
-        AD_01_dataupper[AD_TEMP_data] = AD_data[1]; // ?????AD?CH1,CH2,CH3
-        AD_02_dataupper[AD_TEMP_data] = AD_data[2]; // ???8??????????
-        AD_03_dataupper[AD_TEMP_data] = AD_data[3];
+    for (uint8_t i = 0; i < 8; i++) 
+    {
+        AD_RD_OUTPUT_0;
+        AD_data[i] = get_DB_IO_DATA();
+        AD_RD_OUTPUT_1;
     }
-/******************??FFT????????***************************/
-    if (0x01 == AD_save_flag) {
-        AD_01_datalower[AD_TEMP_data] = AD_data[1];
-        AD_02_datalower[AD_TEMP_data] = AD_data[2];
-        AD_03_datalower[AD_TEMP_data] = AD_data[3];
+    // AD_00_data[AD_dat_cnt]=AD_data[0];
+    if (0x00 == AD_save_flag) 
+    {
+        AD_Data_A_0[AD_dat_cnt] = AD_data[1];
+        AD_Data_B_0[AD_dat_cnt] = AD_data[2];
+        AD_Data_C_0[AD_dat_cnt] = AD_data[3];
     }
-
-    AD_TEMP_data++;
-    if (AD_TEMP_data >= 1280) {
-        AD_TEMP_data = 0;
-        AD_TEMP_flag = 0x01;                // 1280 points sampled
+    if (0x01 == AD_save_flag) 
+    {
+        AD_Data_A_1[AD_dat_cnt] = AD_data[1];
+        AD_Data_B_1[AD_dat_cnt] = AD_data[2];
+        AD_Data_C_1[AD_dat_cnt] = AD_data[3];
+    }
+    AD_dat_cnt++;
+    if (AD_dat_cnt >= 128) 
+    {
+        AD_dat_cnt = 0;
+        AD_TEMP_flag = 0x01;  // 128 points sampled
         AD_save_flag++;
-        //  HAL_TIM_Base_Stop_IT(&htim4);
-        if (AD_save_flag >= 2) { AD_save_flag = 0; }
-    }
-/******************************************************************/
-    flicker_TEMP++;
-    if (flicker_TEMP >= 50) { 
-        flicker_TEMP = 0;
-        if (0x00 == AD_save_flag1) {
-            flicker_01_dataupper[flicker_data] = AD_data[1];
-            flicker_02_dataupper[flicker_data] = AD_data[2];
-            flicker_03_dataupper[flicker_data] = AD_data[3];
-        }
-        if (0x01 == AD_save_flag1) {
-            flicker_01_datalower[flicker_data] = AD_data[1];
-            flicker_02_datalower[flicker_data] = AD_data[2];
-            flicker_03_datalower[flicker_data] = AD_data[3];
-        }
-        flicker_data++;
-        if (flicker_data >= 128) { 
-            flicker_data = 0;
-            flicker_flag = 0x01;
-            AD_save_flag1++;
-            if (AD_save_flag1 >= 2) { AD_save_flag1 = 0; }
+        if (AD_save_flag >= 2) 
+        { 
+            AD_save_flag = 0; 
         }
     }
 
