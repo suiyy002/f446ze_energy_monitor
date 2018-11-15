@@ -14,9 +14,11 @@
 #define A_line 0X0A
 #define B_line 0X0B
 #define C_line 0X0C
-//void LOGIC_Voltage_effective_value (void);
 
 extern void data_process(void);
-
+extern void Voltage_Harmonic_Calc(void);
+extern void Voltage_Deviation_Calc(void);
+extern void Voltage_sag_swell_interruption(void);
+extern void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128]);
 // #endif
 

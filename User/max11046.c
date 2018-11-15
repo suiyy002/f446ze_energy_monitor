@@ -60,18 +60,19 @@ uint16_t AD_Data_B_1[128] = {0};  //B
 uint16_t AD_Data_C_0[128] = {0};  //A
 uint16_t AD_Data_C_1[128] = {0};  //A
 
-uint16_t flicker_ADdata_A_0[128] = {0};
-uint16_t flicker_ADdata_A_1[128] = {0};
-uint16_t flicker_ADdata_B_0[128] = {0};
-uint16_t flicker_ADdata_B_1[128] = {0};
-uint16_t flicker_ADdata_C_0[128] = {0};
-uint16_t flicker_ADdata_C_1[128] = {0}; 
+// uint16_t flicker_ADdata_A_0[128] = {0};
+// uint16_t flicker_ADdata_A_1[128] = {0};
+// uint16_t flicker_ADdata_B_0[128] = {0};
+// uint16_t flicker_ADdata_B_1[128] = {0};
+// uint16_t flicker_ADdata_C_0[128] = {0};
+// uint16_t flicker_ADdata_C_1[128] = {0}; 
 
 uint8_t AD_save_flag = 0, AD_save_flag1 = 0;
 
 
 uint16_t AD_dat_cnt = 0;
-uint8_t AD_TEMP_flag = 0;
+uint8_t AD_har_cnt = 0;
+uint8_t AD_har_flg = 0;
 uint16_t AD_data[8] = {0};
 
 void getADdata(void) 
@@ -104,14 +105,19 @@ void getADdata(void)
         AD_Data_C_1[AD_dat_cnt] = AD_data[3];
     }
     AD_dat_cnt++;
+    
     if (AD_dat_cnt >= 128) 
     {
         AD_dat_cnt = 0;
-        AD_TEMP_flag = 0x01;  // 128 points sampled
         AD_save_flag++;
         if (AD_save_flag >= 2) 
         { 
             AD_save_flag = 0; 
+        }
+        AD_har_cnt++;
+        if(AD_har_cnt >= 10)
+        {
+            AD_har_flg = 1;
         }
     }
 
