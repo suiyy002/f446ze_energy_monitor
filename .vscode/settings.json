@@ -23,7 +23,8 @@
         "queue.h": "c",
         "alg_findextrema.h": "c",
         "stdlib.h": "c",
-        "fft.h": "c"
+        "fft.h": "c",
+        "flash_internal.h": "c"
     },
     "python.pythonPath": "D:\\app\\Python\\Python37\\python.exe"
 }

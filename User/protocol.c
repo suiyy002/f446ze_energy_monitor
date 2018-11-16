@@ -13,14 +13,14 @@
 #define SHORTFRAME_1_LEN 27
 #define VOL_SHORTFRAME_2_BGN 0xb1
 #define VOL_SHORTFRAME_2_END 0xe1
-#define SHORTFRAME_2_LEN 21
+#define SHORTFRAME_2_LEN 27
 
 #define VOL_LONGFRAME_BGN_TRAN 0xb2
 #define TRANSIENT_BGN_A 0x0a
 #define TRANSIENT_BGN_B 0x0b
 #define TRANSIENT_BGN_C 0x0c
 #define VOL_LONGFRAME_END_TRAN 0xe2
-#define LONGFRAME_TRAN_LEN 27
+#define LONGFRAME_TRAN_LEN 28
 
 #define VOL_LONGFRAME_BGN_HAR 0xb3
 #define HARMONIC_BGN_A 0x0a
@@ -44,9 +44,9 @@ union _vol_shortframe_1
         uint16_t vol_phase_BA;
         uint16_t vol_phase_CB;
         uint16_t vol_phase_CA;
-        int16_t vol_rms_diff_A;
-        int16_t vol_rms_diff_B;
-        int16_t vol_rms_diff_C;
+        int16_t vol_rms_diff_BA;
+        int16_t vol_rms_diff_CB;
+        int16_t vol_rms_diff_CA;
         int8_t end; // 0xe0
     }t;
     uint8_t t_tab[SHORTFRAME_1_LEN]; // total bytes
@@ -60,9 +60,12 @@ union _vol_shortframe_2
         int16_t vol_freq_deviation_A;
         int16_t vol_freq_deviation_B;
         int16_t vol_freq_deviation_C;
-        uint16_t vol_flicker_A;
+        uint16_t vol_flicker_A; // 短时
         uint16_t vol_flicker_B;
         uint16_t vol_flicker_C;
+        uint16_t vol_flicker_l_A; // 长时
+        uint16_t vol_flicker_l_B;
+        uint16_t vol_flicker_l_C;
         int16_t vol_rms_deviation_A;
         int16_t vol_rms_deviation_B;
         int16_t vol_rms_deviation_C;
@@ -78,7 +81,7 @@ union _vol_longframe_1
         uint8_t id; 
         uint8_t channel; // 0x0a or 0x0b or 0x0c
         uint16_t wavlen;
-        uint8_t cnt; // 128 max or 127 max
+        uint16_t cnt; // 计数变量
         uint16_t wav16[10];
         uint8_t end; // 0xe2
     }t;
@@ -111,14 +114,20 @@ union _vol_longframe_2 vol_longframe_2;
 
 
 // extern variables
-extern float rms_tab[];
 extern freq_cap_t pfreq;
+extern double rms_avg[2][3];// 均值, Voltage_Deviation_Calc
+extern uint8_t flg_rms_avg;
+extern double Data_deviation[3];
+extern double fluctuation[3];
+extern double flicker_Pst[3];
+extern double flicker_Plt[3];
+
 
 
 // function prototypes
 static void nrf_send(uint8_t *txbuf, uint8_t size);
 void nrf_send_shortframe_1
-(
+(void
     // union _vol_shortframe_1 *p, 
     // void (*send)(uint8_t *txbuf, uint8_t size)
 );
@@ -150,15 +159,18 @@ void nrf_send_shortframe_1(void)
     #define TAB vol_shortframe_1.t_tab
     T.bgn = VOL_SHORTFRAME_1_BGN;
     T.id = SENSOR_ID;
+    T.vol_fluctuation_A = (uint16_t)(fluctuation[0] * 100);
+    T.vol_fluctuation_B = (uint16_t)(fluctuation[1] * 100);
+    T.vol_fluctuation_C = (uint16_t)(fluctuation[2] * 100);
+    T.vol_rms_A = (uint16_t)(rms_avg[!flg_rms_avg][0] * 100);
+    T.vol_rms_B = (uint16_t)(rms_avg[!flg_rms_avg][1] * 100);
+    T.vol_rms_C = (uint16_t)(rms_avg[!flg_rms_avg][2] * 100);
     T.vol_phase_BA = (uint16_t)(pfreq->phase_ang[0] * 100);
     T.vol_phase_CB = (uint16_t)(pfreq->phase_ang[1] * 100);
     T.vol_phase_CA = (uint16_t)(pfreq->phase_ang[2] * 100);
-    T.vol_rms_A = (uint16_t)(rms_tab[0] * 100);
-    T.vol_rms_B = (uint16_t)(rms_tab[1] * 100);
-    T.vol_rms_C = (uint16_t)(rms_tab[2] * 100);
-    T.vol_rms_diff_A = (int16_t)((rms_tab[1] - rms_tab[0]) * 100);
-    T.vol_rms_diff_B = (int16_t)((rms_tab[2] - rms_tab[1]) * 100);
-    T.vol_rms_diff_C = (int16_t)((rms_tab[2] - rms_tab[0]) * 100);
+    T.vol_rms_diff_BA = (int16_t)((T.vol_rms_B - T.vol_rms_A) * 100);
+    T.vol_rms_diff_CB = (int16_t)((T.vol_rms_C - T.vol_rms_B) * 100);
+    T.vol_rms_diff_CA = (int16_t)((T.vol_rms_C - T.vol_rms_A) * 100);
     T.end = VOL_SHORTFRAME_1_END;
     
     nrf_send(TAB, sizeof(TAB));
@@ -172,15 +184,18 @@ void nrf_send_shortframe_2(void)
     #define TAB vol_shortframe_2.t_tab
     T.bgn = VOL_SHORTFRAME_2_BGN;
     T.id = SENSOR_ID;
-    T.vol_freq_deviation_A = (int16_t)(pfreq->freq[0] - VOL_STD_FREQ);
-    T.vol_freq_deviation_B = (int16_t)(pfreq->freq[0] - VOL_STD_FREQ);
-    T.vol_freq_deviation_C = (int16_t)(pfreq->freq[0] - VOL_STD_FREQ);
-
-    //todo add flicker data
-
-    T.vol_rms_deviation_A = (int16_t)(rms_tab[0] - VOL_STD_RMS_A);
-    T.vol_rms_deviation_B = (int16_t)(rms_tab[1] - VOL_STD_RMS_B);
-    T.vol_rms_deviation_C = (int16_t)(rms_tab[2] - VOL_STD_RMS_C);
+    T.vol_freq_deviation_A = (int16_t)((pfreq->freq[0] - VOL_STD_FREQ) * 100);
+    T.vol_freq_deviation_B = (int16_t)((pfreq->freq[1] - VOL_STD_FREQ) * 100);
+    T.vol_freq_deviation_C = (int16_t)((pfreq->freq[2] - VOL_STD_FREQ) * 100);
+    T.vol_flicker_A = (uint16_t)(flicker_Pst[0] * 100);
+    T.vol_flicker_B = (uint16_t)(flicker_Pst[1] * 100);
+    T.vol_flicker_C = (uint16_t)(flicker_Pst[2] * 100);
+    T.vol_flicker_l_A = (uint16_t)(flicker_Plt[0] * 100);
+    T.vol_flicker_l_A = (uint16_t)(flicker_Plt[1] * 100);
+    T.vol_flicker_l_A = (uint16_t)(flicker_Plt[2] * 100);
+    T.vol_rms_deviation_A = (int16_t)(Data_deviation[0] * 100);
+    T.vol_rms_deviation_B = (int16_t)(Data_deviation[1] * 100);
+    T.vol_rms_deviation_C = (int16_t)(Data_deviation[2] * 100);
     T.end = VOL_SHORTFRAME_2_END;
 
     nrf_send(TAB, SHORTFRAME_2_LEN);
@@ -210,7 +225,7 @@ void nrf_send_longframe_1(uint16_t buf[], uint16_t wavlen, uint16_t chl)
     {
         for(uint16_t i = 0; i < 10; i++)
         {
-            wav[i] = (uint16_t)((((buf[i + _cnt] > 32768.0) ? (buf[i + _cnt] - 32768.0) : 0) * 5.0 / 32768.0) * 100);
+            wav[i] = buf[i];
         }
         nrf_send(TAB, sizeof(TAB));
         delay_ms(50);
@@ -232,7 +247,7 @@ void nrf_send_longframe_1(uint16_t buf[], uint16_t wavlen, uint16_t chl)
     #undef wav
     #undef _cnt
     // #undef chl_inc()
-    #undef cnt_inc(n)
+    #undef cnt_inc
     #undef TAB
     #undef T
 }

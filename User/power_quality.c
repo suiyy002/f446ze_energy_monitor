@@ -26,8 +26,9 @@ extern uint16_t AD_Data_C_1[128];  //A
 /* 保证实时计算还是要放到adc驱动里面，或者放到中断里面 */
 double ad_RMS[3] = {0};         // 三相电压均方根数组
 double rms_avg[2][3] = {0};     // 均值, Voltage_Deviation_Calc
+uint8_t flg_rms_avg = 0;
 uint16_t rms_cnt = 0;
-double rms_fluct[2][3][512] = {0};         /* 三相rms离散数据 */
+float rms_fluct[2][3][512] = {0};         /* 三相rms离散数据 */
 uint8_t rms_fluct_flg = 0;
 uint16_t idx_rms_fluct = 0;             /* 三相rms离散数据索引 */
 void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128])
@@ -79,6 +80,7 @@ void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128])
     }
     else
     {
+        flg_rms_avg ^= 1;
         rms_cnt = 0;
         for(i = 0; i < 3; i++)
         {
@@ -221,7 +223,7 @@ void Voltage_Deviation_Calc(void)
 #endif
 
 /* calculate flicker and voltage fluctuation */
-#if 1 /* 折叠代码/注释代码用，挺方便的 */
+#if 1 /* 折叠代码、注释代码用，挺方便的 */
     /* 每个周期都进行rms计算，采样512次得到数组rms_fluct[3][512]，
     使用极值寻找算法寻找相邻极值，计算电压波动 */
 
@@ -333,7 +335,7 @@ void Voltage_Deviation_Calc(void)
             findExtrema(rms_fluct[!rms_fluct_flg][j], 512, 50, 
                 max_idx_tab[j], &max_qty[j], min_idx_tab[j], &min_qty[j]);
             /* 问号表达式作用是取相邻极值 */
-            for(uint8_t i = 0; i < (max_qty > min_qty ? min_qty : max_qty); i++)
+            for(uint8_t i = 0; i < (max_qty[j] > min_qty[j] ? min_qty[j] : max_qty[j]); i++)
             { /* 遍历极值索引数组 */
                 if /* 记录最大极值差 */
                 (
@@ -424,7 +426,7 @@ float phase_tab_ang[3];
 float phase_tab_rad[3];
 
 /* 谐波参数计算 */
-extern uint8_t AD_har_flag;
+extern uint8_t AD_har_flg;
 extern float fft_harmonicA_output[]; //FFT 输出数组
 extern float fft_harmonicB_output[]; //FFT 输出数组
 extern float fft_harmonicC_output[]; //FFT 输出数组
@@ -433,7 +435,7 @@ float UH[3] = {0};
 float THDu[3] = {0};
 void Voltage_Harmonic_Calc(void)
 {
-    if(AD_har_flag) /* 10个周波一次 */
+    if(AD_har_flg) /* 10个周波一次 */
     {
         if (0x01 == AD_save_flag) 
         {

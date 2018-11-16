@@ -37,7 +37,7 @@ void free(void *ptr)
 // int idx_min_tab[12];
 // double src[12] = {0, -1, 0, 1, 0, 1, 0, -2, 2, 0, 1, 1};
 void findExtrema(
-    double *src, int src_len, double distance,
+    float *src, int src_len, float distance,
     int *idx_max_tab, int *max_qty,
     int *idx_min_tab, int *min_qty)
 {
@@ -48,16 +48,16 @@ void findExtrema(
         min_idx = 0;
     *max_qty = 0;
     *min_qty = 0;
-    double *src_sorted = (double *)malloc(src_len * sizeof(double));
+    float *src_sorted = (float *)malloc(src_len * sizeof(float));
     for(int i = 0; i < src_len; i++)
     {
         src_sorted[i] = src[i];
     }
-    qsort(src_sorted, src_len, sizeof(double), cmp);
+    qsort(src_sorted, src_len, sizeof(float), cmp);
     // 后值减前值，差值为负记作 -1，为零记作 0，为正记作 1
     for (int i = 1; i < src_len; i++)
     {
-        double diff = src[i] - src[i - 1];
+        float diff = src[i] - src[i - 1];
         if (diff > 0)
             sign[i - 1] = 1;
         else if (diff < 0)
@@ -67,7 +67,7 @@ void findExtrema(
     }
     for (int j = 1; j < src_len - 1; j++)
     {
-        double diff = sign[j] - sign[j - 1];
+        float diff = sign[j] - sign[j - 1];
         if (diff < 0)
             idx_max_tab[max_idx++] = j;// start from j=1, so it's not j-1
         else if (diff > 0)

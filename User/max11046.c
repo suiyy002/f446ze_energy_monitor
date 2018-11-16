@@ -29,9 +29,9 @@ void CRX_OUTPUT_INIT(void) {
     HAL_GPIO_Init(AD_DB0_GPIO_Port, &GPIO_InitStruct);
 }
 
-uint16_t get_DB_IO_DATA(void) {
+uint16_t get_DB_IO_DATA(void) 
+{
     uint16_t DB_DATA = 0;
-
     if (AD_DOUT0_INUPT) DB_DATA |= 0x0001;
     if (AD_DOUT1_INUPT) DB_DATA |= 0x0002;
     if (AD_DOUT2_INUPT) DB_DATA |= 0x0004;
@@ -60,13 +60,9 @@ uint16_t AD_Data_B_1[128] = {0};  //B
 uint16_t AD_Data_C_0[128] = {0};  //A
 uint16_t AD_Data_C_1[128] = {0};  //A
 
-// uint16_t flicker_ADdata_A_0[128] = {0};
-// uint16_t flicker_ADdata_A_1[128] = {0};
-// uint16_t flicker_ADdata_B_0[128] = {0};
-// uint16_t flicker_ADdata_B_1[128] = {0};
-// uint16_t flicker_ADdata_C_0[128] = {0};
-// uint16_t flicker_ADdata_C_1[128] = {0}; 
-
+uint16_t ad_wav[2][3][6400] = {0}; // 1 second, 75KB
+uint16_t ad_wav_cnt = 0;
+uint16_t ad_wav_flg = 0;
 uint8_t AD_save_flag = 0, AD_save_flag1 = 0;
 
 
@@ -105,13 +101,12 @@ void getADdata(void)
         AD_Data_C_1[AD_dat_cnt] = AD_data[3];
     }
     AD_dat_cnt++;
-    
     if (AD_dat_cnt >= 128) 
     {
         AD_dat_cnt = 0;
         AD_save_flag++;
         if (AD_save_flag >= 2) 
-        { 
+        {
             AD_save_flag = 0; 
         }
         AD_har_cnt++;
@@ -120,7 +115,19 @@ void getADdata(void)
             AD_har_flg = 1;
         }
     }
-
+    ad_wav_cnt++;
+    if(ad_wav_cnt >= 6400)
+    {
+        ad_wav_cnt = 0;
+        ad_wav_flg ^= 1;
+    }
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        ad_wav[!ad_wav_flg][i][ad_wav_cnt] = 
+            (uint16_t)((((ad_wav[!ad_wav_flg][i][ad_wav_cnt] > 32768.0) ? 
+            (ad_wav[!ad_wav_flg][i][ad_wav_cnt] - 32768.0) : 0)
+            * 5.0 / 32768.0) * 100);
+    }
     AD_RD_OUTPUT_1;
     AD_CS_OUTPUT_1;
     AD_CONVST_OUTPUT_1;

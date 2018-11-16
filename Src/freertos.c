@@ -60,7 +60,7 @@
 #include "nrf24l01_reg.h"
 #include "nrf24l01.h"
 #include "delay.h"
-#include "w25q64.h"
+// #include "w25q64.h"
 #include "protocol.h"
 /* USER CODE END Includes */
 
@@ -216,43 +216,30 @@ static void nrf_send(uint8_t *txbuf, uint8_t size)
 uint8_t readbuf[4];
 void StartNrfTask(void const * arg)
 {
-  // enable w25q64   
-  w25q64_init();
+
   // initialization of nrf24
   while(!NRF_Check(0))
   {
     dgb_flg.flg.nrf_err = 1;
   }
   dgb_flg.flg.nrf_err = 0;
-  uint8_t testbuf[5] = {'1', '2', '3', '4', '\n'};
-  SpiFlash_Write_Data(testbuf, 1, 1, 4);
-  osDelay(2);
-  SpiFlash_Read_Data(readbuf, 1, 1, 4);
-  osDelay(2);
-  for(int i=0; i<4; i++)
-  {
-    if(testbuf[i] != readbuf[i])
-    {
-      dgb_flg.flg.w25q64_err = 1;
-      break;
-    }
-  }
+  
+  //thread loop
   for(;;)
   {
     // do something
     if(dgb_flg.flg.nrf_send)
     {
-//      nrf_send(testbuf, sizeof(testbuf));
       dgb_flg.flg.nrf_send = 0;
       for(uint8_t i=0; i<3; i++)
       {
         pfreq->freq[i] = 1;
         pfreq->phase_ang[i] = 1;
-        rms_tab[i] = i;
+//        rms_tab[i] = i;
       }
       nrf_send_shortframe_1();
     }
-//    nRF24L01_Revceive(0);
+    nRF24L01_Revceive(0);
     osDelay(5);
   }
 }

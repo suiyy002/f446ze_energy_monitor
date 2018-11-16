@@ -472,6 +472,36 @@
               <FileType>5</FileType>
               <FilePath>..\User\protocol.h</FilePath>
             </File>
+            <File>
+              <FileName>flash_internal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\flash_internal.c</FilePath>
+            </File>
+            <File>
+              <FileName>util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\util.c</FilePath>
+            </File>
+            <File>
+              <FileName>flash_internal.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\flash_internal.h</FilePath>
+            </File>
+            <File>
+              <FileName>util.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\util.h</FilePath>
+            </File>
+            <File>
+              <FileName>alg_findextrema.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\alg_findextrema.c</FilePath>
+            </File>
+            <File>
+              <FileName>alg_findextrema.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\alg_findextrema.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

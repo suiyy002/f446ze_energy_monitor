@@ -58,6 +58,8 @@
 #include "freq_cap.h"
 #include "power_quality.h"
 #include "max11046.h"
+#include "util.h"
+#include "flash_internal.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -71,6 +73,20 @@ extern uint16_t AD_Data_B_0[128];  //B
 extern uint16_t AD_Data_B_1[128];  //B
 extern uint16_t AD_Data_C_0[128];  //A
 extern uint16_t AD_Data_C_1[128];  //A
+#ifdef __UTIL_TEST__  /* util.c test */
+  volatile uint16_t tmp_ = 0x1234;
+  volatile uint32_t tmp_32 = 0x12345678;
+  volatile uint64_t tmp_64 = 0x123456789abcdeff;
+  volatile void* ptmp_ = NULL;
+  volatile uint32_t* ptmp_32 = NULL;
+  volatile uint64_t* ptmp_64 = NULL;
+  volatile uint16_t* ptmp_16 = NULL;
+#endif  /* util.c test */
+#define __FLASH_TEST__
+#ifdef __FLASH_TEST__  /* flash_internal.c test */
+  volatile uint16_t err_flg = 0x00;
+  extern uint16_t ad_wav[2][3][6400]; // 1 second, 75KB
+#endif  /* flash_internal.c test */
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,13 +139,22 @@ int main(void)
   Configuration_AD_register();
   HAL_Delay(10);
 
+  #ifdef __FLASH_TEST__ /* flash_internal.c test */
+    flash_erase(7); /* erase sector 7 */
+    ad_wav[0][0][0] = 0x01;
+    ad_wav[0][1][0] = 0x01;
+    ad_wav[0][2][0] = 0x01;
+    err_flg = flash_write((uint16_t*)ad_wav[0], 7, 19200);
+  #endif /* flash_internal.c test */
+
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
+  // MX_FREERTOS_Init();
 
   /* Start scheduler */
-  osKernelStart();
+  // osKernelStart();
   
   /* We should never get here as control is now taken by the scheduler */
 
@@ -141,7 +166,17 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+    
+    #if __UTIL_TEST__ /* util.c test */
+      ptmp_ = endian_exchange(tmp_, 2);
+      tmp_ = *(uint16_t*)ptmp_;
+      ptmp_32 = endian_exchange(tmp_32, 4);
+      tmp_32 = *(uint32_t*)ptmp_32;
+      ptmp_64 = endian_exchange(tmp_64, 8);
+      tmp_64 = *(uint64_t*)ptmp_64;
+    __nop();
+    #endif /* util.c test */
+    
   }
   /* USER CODE END 3 */
 
