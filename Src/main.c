@@ -73,6 +73,13 @@ extern uint16_t AD_Data_B_0[128];  //B
 extern uint16_t AD_Data_B_1[128];  //B
 extern uint16_t AD_Data_C_0[128];  //A
 extern uint16_t AD_Data_C_1[128];  //A
+// #define __SORT_TEST__
+#ifdef __SORT_TEST__
+  #include "alg_findextrema.h"
+  #include "alg_sort.h"
+  float test_arr[512] = {0.1, 0.2, 0.3, 0.74, 0.53, 0.12, 0.7, 0.8};
+  float test_arr_max_min[2] = {0};
+#endif
 #ifdef __UTIL_TEST__  /* util.c test */
   volatile uint16_t tmp_ = 0x1234;
   volatile uint32_t tmp_32 = 0x12345678;
@@ -82,7 +89,7 @@ extern uint16_t AD_Data_C_1[128];  //A
   volatile uint64_t* ptmp_64 = NULL;
   volatile uint16_t* ptmp_16 = NULL;
 #endif  /* util.c test */
-#define __FLASH_TEST__
+// #define __FLASH_TEST__
 #ifdef __FLASH_TEST__  /* flash_internal.c test */
   volatile uint16_t err_flg = 0x00;
   extern uint16_t ad_wav[2][3][6400]; // 1 second, 75KB
@@ -139,6 +146,12 @@ int main(void)
   Configuration_AD_register();
   HAL_Delay(10);
 
+  #ifdef __SORT_TEST__
+    bubble_sort_f32(test_arr, 512);
+    __nop();
+    findmax_min_f32(test_arr, 512, test_arr_max_min);
+    __nop();
+  #endif
   #ifdef __FLASH_TEST__ /* flash_internal.c test */
     flash_erase(7); /* erase sector 7 */
     ad_wav[0][0][0] = 0x01;
@@ -147,14 +160,19 @@ int main(void)
     err_flg = flash_write((uint16_t*)ad_wav[0], 7, 19200);
   #endif /* flash_internal.c test */
 
-
+  // start capture
+  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
-  // MX_FREERTOS_Init();
+//  MX_FREERTOS_Init();
 
   /* Start scheduler */
-  // osKernelStart();
+//  osKernelStart();
   
   /* We should never get here as control is now taken by the scheduler */
 
@@ -166,7 +184,11 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-    
+    if (0x01 == AD_save_flag)
+        Voltage_RMS_Calc(AD_Data_A_0, AD_Data_B_0, AD_Data_C_0);
+    if (0x00 == AD_save_flag)
+        Voltage_RMS_Calc(AD_Data_A_1, AD_Data_B_1, AD_Data_C_1);
+    data_process();
     #if __UTIL_TEST__ /* util.c test */
       ptmp_ = endian_exchange(tmp_, 2);
       tmp_ = *(uint16_t*)ptmp_;
@@ -351,10 +373,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
             pfreq->phase_bgn_flg[i] = 0;
           }
         #endif
-//        for(uint8_t i=0; i<3; i++)
-//        {
-//          pfreq->phase_bgn_flg[i] = 2;
-//        }
+  //        for(uint8_t i=0; i<3; i++)
+  //        {
+  //          pfreq->phase_bgn_flg[i] = 2;
+  //        }
       }
     }
     else
@@ -388,10 +410,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim->Instance == TIM4)
   {
     getADdata();
-    if (0x01 == AD_save_flag)
-        Voltage_RMS_Calc(AD_Data_A_0, AD_Data_B_0, AD_Data_C_0);
-    if (0x00 == AD_save_flag)
-        Voltage_RMS_Calc(AD_Data_A_1, AD_Data_B_1, AD_Data_C_1);
+
   }
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM14) {
