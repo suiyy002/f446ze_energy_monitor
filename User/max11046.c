@@ -62,7 +62,8 @@ uint16_t AD_Data_C_1[128] = {0};  //A
 
 uint16_t ad_wav[2][3][6400] = {0}; // 1 second, 75KB
 uint16_t ad_wav_cnt = 0;
-uint16_t ad_wav_flg = 0;
+uint8_t ad_wav_flg = 0;
+uint8_t ad_wav_valid = 0;
 uint8_t AD_save_flag = 0, AD_save_flag1 = 0;
 
 
@@ -120,6 +121,7 @@ void getADdata(void)
     {
         ad_wav_cnt = 0;
         ad_wav_flg ^= 1;
+        ad_wav_valid = 1;
     }
     for(uint8_t i = 0; i < 3; i++)
     {

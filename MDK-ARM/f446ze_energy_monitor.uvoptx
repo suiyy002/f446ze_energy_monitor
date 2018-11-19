@@ -120,7 +120,6 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name>??泈??泈?</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -130,7 +129,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGTARM</Key>
-          <Name>(1010=-1,-1,-1,-1,0)(1007=-1,-1,-1,-1,0)(1008=-1,-1,-1,-1,0)(1009=-1,-1,-1,-1,0)(1012=-1,-1,-1,-1,0)</Name>
+          <Name>(1010=-1,-1,-1,-1,0)(1007=-1,-1,-1,-1,0)(1008=-1,-1,-1,-1,0)(1009=239,189,579,912,0)(1012=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -157,18 +156,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>160</LineNumber>
+          <LineNumber>213</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134233916</Address>
+          <Address>134237928</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Src/main.c</Filename>
+          <Filename>..\User\alg_findextrema.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\f446ze_energy_monitor\../Src/main.c\160</Expression>
+          <Expression>\\f446ze_energy_monitor\../User/alg_findextrema.c\213</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>212</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134237922</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\User\alg_findextrema.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\f446ze_energy_monitor\../User/alg_findextrema.c\212</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -180,59 +195,101 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rms_tab</ItemText>
+          <ItemText>rms_avg</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ad_RMS</ItemText>
+          <ItemText>Data_deviation</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>dgb_flg</ItemText>
+          <ItemText>HRUh</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>NRF_rx_buf</ItemText>
+          <ItemText>THDu</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>readbuf</ItemText>
+          <ItemText>rms_fluct</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>vol_shortframe_1</ItemText>
+          <ItemText>fluctuation</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>freq</ItemText>
+          <ItemText>ad_RMS</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tmp_</ItemText>
+          <ItemText>min_idx_tab,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tmp_32</ItemText>
+          <ItemText>max_idx_tab,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tmp_64</ItemText>
+          <ItemText>src_sorted</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>err_flg</ItemText>
+          <ItemText>Udiff_max</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>max_qty,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>min_qty,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
+      <WatchWindow2>
+        <Ww>
+          <count>0</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>AD_save_flag</ItemText>
+        </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>AD_save_flag1</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>flg_rms_avg</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>rms_fluct_flg</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>flg_rms_fluct_valid</ItemText>
+        </Ww>
+        <Ww>
+          <count>5</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>AD_har_flg</ItemText>
+        </Ww>
+      </WatchWindow2>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
@@ -263,7 +320,7 @@
       <DebugFlag>
         <trace>0</trace>
         <periodic>1</periodic>
-        <aLwin>0</aLwin>
+        <aLwin>1</aLwin>
         <aCover>0</aCover>
         <aSer1>0</aSer1>
         <aSer2>0</aSer2>
@@ -599,6 +656,42 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+    <File>
+      <GroupNumber>2</GroupNumber>
+      <FileNumber>24</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\User\alg_bubblesort.c</PathWithFileName>
+      <FilenameWithoutPath>alg_bubblesort.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>2</GroupNumber>
+      <FileNumber>25</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\User\alg_findmax_min.c</PathWithFileName>
+      <FilenameWithoutPath>alg_findmax_min.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>2</GroupNumber>
+      <FileNumber>26</FileNumber>
+      <FileType>5</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\User\alg_sort.h</PathWithFileName>
+      <FilenameWithoutPath>alg_sort.h</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
   </Group>
 
   <Group>
@@ -609,7 +702,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>24</FileNumber>
+      <FileNumber>27</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -621,7 +714,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>25</FileNumber>
+      <FileNumber>28</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -633,7 +726,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>26</FileNumber>
+      <FileNumber>29</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -645,7 +738,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>27</FileNumber>
+      <FileNumber>30</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -657,7 +750,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>28</FileNumber>
+      <FileNumber>31</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -669,7 +762,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>29</FileNumber>
+      <FileNumber>32</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -681,7 +774,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>30</FileNumber>
+      <FileNumber>33</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -693,7 +786,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>31</FileNumber>
+      <FileNumber>34</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -713,7 +806,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>32</FileNumber>
+      <FileNumber>35</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -725,7 +818,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>33</FileNumber>
+      <FileNumber>36</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -737,7 +830,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>34</FileNumber>
+      <FileNumber>37</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -749,7 +842,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>35</FileNumber>
+      <FileNumber>38</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -761,7 +854,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>36</FileNumber>
+      <FileNumber>39</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -773,7 +866,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>37</FileNumber>
+      <FileNumber>40</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -785,7 +878,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>38</FileNumber>
+      <FileNumber>41</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -797,7 +890,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>39</FileNumber>
+      <FileNumber>42</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -809,7 +902,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>40</FileNumber>
+      <FileNumber>43</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -821,7 +914,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>41</FileNumber>
+      <FileNumber>44</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -833,7 +926,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>42</FileNumber>
+      <FileNumber>45</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -845,7 +938,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>43</FileNumber>
+      <FileNumber>46</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -857,7 +950,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>44</FileNumber>
+      <FileNumber>47</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -869,7 +962,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>45</FileNumber>
+      <FileNumber>48</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -881,7 +974,7 @@
     </File>
     <File>
       <GroupNumber>4</GroupNumber>
-      <FileNumber>46</FileNumber>
+      <FileNumber>49</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -901,7 +994,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>5</GroupNumber>
-      <FileNumber>47</FileNumber>
+      <FileNumber>50</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -921,7 +1014,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>48</FileNumber>
+      <FileNumber>51</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -933,7 +1026,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>49</FileNumber>
+      <FileNumber>52</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -945,7 +1038,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>50</FileNumber>
+      <FileNumber>53</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -957,7 +1050,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>51</FileNumber>
+      <FileNumber>54</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -969,7 +1062,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>52</FileNumber>
+      <FileNumber>55</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -981,7 +1074,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>53</FileNumber>
+      <FileNumber>56</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -993,7 +1086,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>54</FileNumber>
+      <FileNumber>57</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1005,7 +1098,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>55</FileNumber>
+      <FileNumber>58</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1017,7 +1110,7 @@
     </File>
     <File>
       <GroupNumber>6</GroupNumber>
-      <FileNumber>56</FileNumber>
+      <FileNumber>59</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>

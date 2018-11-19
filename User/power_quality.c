@@ -3,7 +3,9 @@
 #include "fft.h"
 #include "cmsis_os.h"
 #include "alg_findextrema.h"
-#include "stdlib.h" /* for qsort() */
+#include "alg_sort.h"
+
+
 extern uint8_t AD_save_flag, AD_save_flag1;
 
 extern uint16_t AD_Data_A_0[128];  //C
@@ -31,9 +33,10 @@ uint16_t rms_cnt = 0;
 float rms_fluct[2][3][512] = {0};         /* 三相rms离散数据 */
 uint8_t rms_fluct_flg = 0;
 uint16_t idx_rms_fluct = 0;             /* 三相rms离散数据索引 */
+volatile uint8_t flg_rms_fluct_valid = 0;
 void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128])
 {
-    double AD_data_sum[3];
+    double AD_data_sum[3] = {0};
     float tmp[3] = {0};
     uint8_t i = 0;
     for (; i < 128; i++) 
@@ -57,15 +60,14 @@ void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128])
     {
         idx_rms_fluct = 0;
         rms_fluct_flg ^= 1;
+        flg_rms_fluct_valid = 1;
     }
 
     // convert AD value to real voltage
     for(i = 0; i < 3; i++)
     {
         /* internal ref voltage & offset-binary code */
-        ad_RMS[i] = ((ad_RMS[i] > 32768.0) ? (ad_RMS[i] - 32768.0) : 0)
-        * 5.0 / 32768.0;
-        /* 存一个点 */
+        ad_RMS[i] = ((ad_RMS[i] > 32768.0) ? (ad_RMS[i] - 32768.0) : 0) * 5.0 / 32768.0;
         rms_fluct[rms_fluct_flg][i][idx_rms_fluct] = ad_RMS[i];
     }
     idx_rms_fluct++;
@@ -80,11 +82,12 @@ void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128])
     }
     else
     {
-        flg_rms_avg ^= 1;
+        flg_rms_avg = 1;
         rms_cnt = 0;
         for(i = 0; i < 3; i++)
         {
             rms_avg[1][i] = rms_avg[0][i] / 10;
+            rms_avg[0][i] = 0;
         }
     }
 }
@@ -179,10 +182,11 @@ void Voltage_sag_swell_interruption(void)
 /******************压偏差强调的是实际电压偏离系统标称电压的数值
 ，与偏差持续的时间无关。参考于《电能质量 供电电压偏差》
 GB/T 12325-2008************************************************/
-double Data_deviation[3];
+double Data_deviation[3] = {0};
 void Voltage_Deviation_Calc(void)
 {
-
+     if(!flg_rms_avg)
+         return;
     for (uint8_t i = 0; i < 10; i++) 
     {
         Data_deviation[0] += rms_avg[1][0];
@@ -197,30 +201,13 @@ void Voltage_Deviation_Calc(void)
     Data_deviation[0] = (Data_deviation[0] - VOL_STD_RMS_A) / VOL_STD_RMS_A;
     Data_deviation[1] = (Data_deviation[1] - VOL_STD_RMS_B) / VOL_STD_RMS_B;
     Data_deviation[2] = (Data_deviation[2] - VOL_STD_RMS_C) / VOL_STD_RMS_C;
-}
-
-#if 0
-    /*********************电压波动********************************/
-    /*电压波动：电压方均根值一系列相对快速变动或连续改变的现象，
-    IEEE中给出的典型电压波动范围为0.1%~7%，变化频率小于25Hz，
-    电压的有效值的变化范围小于±10%。可参考《电能质量 电压波动与闪变》
-    GB/T 12326-2008。**********************************************/
-    /* 采样点数为128，采样频率为6400/50Hz, Fn = (n-1)Hz，所以FFT计算出的数组只需要前25个数据 */
-    void GET_LESSTHAN25Hz_data(void)
+    for(uint8_t i = 0; i < 3; i++)
     {
-        if (0x01 == AD_save_flag1) {
-            Harmonic_calculation_FFT(flicker_03_dataupper, A_line);//谐波计算 a
-            Harmonic_calculation_FFT(flicker_02_dataupper, B_line);//谐波计算 b
-            Harmonic_calculation_FFT(flicker_01_dataupper, C_line);//谐波计算 c
-        }
-        if (0x00 == AD_save_flag1) {
-            Harmonic_calculation_FFT(flicker_03_datalower, A_line);//谐波计算 a
-            Harmonic_calculation_FFT(flicker_02_datalower, B_line);//谐波计算 b
-            Harmonic_calculation_FFT(flicker_01_datalower, C_line);//谐波计算 c
-        }
-
+        if(Data_deviation[i] > 1000)
+            __nop();
     }
-#endif
+    flg_rms_avg = 0;
+}
 
 /* calculate flicker and voltage fluctuation */
 #if 1 /* 折叠代码、注释代码用，挺方便的 */
@@ -229,11 +216,11 @@ void Voltage_Deviation_Calc(void)
 
     double fluctuation[3] = {0};            /* 电压波动数据，每5.12s更新一次 */
     /* 找极值 */
-    int min_idx_tab[3][12]; /* distance是50，所以元素肯定小于12个 */
-    int max_idx_tab[3][12];
-    int max_qty[3] = {0}, min_qty[3] = {0};
-    double Udiff_max[3] = {0.001, 0.001, 0.001}; // 所有极值差中最大的
-    int idx_flickermeter_response_freq[36] = /* N=512, res=0.09765Hz */
+    uint16_t min_idx_tab[3][12]; /* distance是50，所以元素肯定小于12个 */
+    uint16_t max_idx_tab[3][12];
+    uint16_t max_qty[3] = {0}, min_qty[3] = {0};
+    double Udiff_max[3] = {0.00000001, 0.00000001, 0.00000001}; // 所有极值差中最大的
+    uint16_t idx_flickermeter_response_freq[36] = /* N=512, res=0.09765Hz */
     {
         6,
         11,
@@ -317,23 +304,22 @@ void Voltage_Deviation_Calc(void)
     double flicker_S[2][3][60] = {0}; // 瞬时闪变值数组
     int cnt_flicker_S = 0;
     int flg_flicker_S = 0;
-    int qsort_cmp( const void *a , const void *b )
-    {
-        return *(double *)a > *(double *)b ? 1 : -1;
-    }
-    int flg_Pst_valid = 0;
-    int cnt_Pst = 0;
+    // int qsort_cmp( const void *a , const void *b ){return *(double *)a > *(double *)b ? 1 : -1;}
+    uint16_t flg_Pst_valid = 0;
+    uint16_t cnt_Pst = 0;
     double flicker_Pst[3] = {0};
     double flicker_Pst_tab[3][12] = {0};
-    int flg_Plt_valid = 0;
+    uint16_t flg_Plt_valid = 0;
     double flicker_Plt[3] = {0};
-    void calc_fluctuation_and_flicker(void)
+    void Voltage_Fluctuation_and_Flicker_Calc(void)
     {
+        if(!flg_rms_fluct_valid)
+            return;
         // 寻找极值
         for(uint8_t j = 0; j < 3; j++) /* 遍历三相数组 */
         {
-            findExtrema(rms_fluct[!rms_fluct_flg][j], 512, 50, 
-                max_idx_tab[j], &max_qty[j], min_idx_tab[j], &min_qty[j]);
+           findExtrema(rms_fluct[!rms_fluct_flg][j], 512, 50, 
+               max_idx_tab[j], &max_qty[j], min_idx_tab[j], &min_qty[j]);
             /* 问号表达式作用是取相邻极值 */
             for(uint8_t i = 0; i < (max_qty[j] > min_qty[j] ? min_qty[j] : max_qty[j]); i++)
             { /* 遍历极值索引数组 */
@@ -379,7 +365,8 @@ void Voltage_Deviation_Calc(void)
             }
             for(uint8_t i = 0; i < 3; i++)
             {
-                qsort(flicker_S[!flg_flicker_S][i], 60, sizeof(double), qsort_cmp);
+                // qsort(flicker_S[!flg_flicker_S][i], 60, sizeof(double), qsort_cmp);
+                bubble_sort_f64(flicker_S[!flg_flicker_S][i], 60);
                 /* 论文公式 */
                 flicker_Pst[i] = 0.0314 * flicker_S[!flg_flicker_S][i][1]
                                + 0.0525 * flicker_S[!flg_flicker_S][i][1]
@@ -416,6 +403,7 @@ void Voltage_Deviation_Calc(void)
                 2);
         }
         cnt_flicker_S++;
+        flg_rms_fluct_valid = 0;
     }
 #endif
 
@@ -430,9 +418,9 @@ extern uint8_t AD_har_flg;
 extern float fft_harmonicA_output[]; //FFT 输出数组
 extern float fft_harmonicB_output[]; //FFT 输出数组
 extern float fft_harmonicC_output[]; //FFT 输出数组
-float HRUh[3][49] = {0}; /* 49次谐波 */
-float UH[3] = {0};
-float THDu[3] = {0};
+float HRUh[3][50] = {0}; // 第h次谐波电压含有率 49次谐波 
+float UH[3] = {0}; // 谐波电压含量
+float THDu[3] = {0}; //总谐波畸变率
 void Voltage_Harmonic_Calc(void)
 {
     if(AD_har_flg) /* 10个周波一次 */
@@ -449,37 +437,37 @@ void Voltage_Harmonic_Calc(void)
             fft_harmonic_calc(AD_Data_B_1, B_line);
             fft_harmonic_calc(AD_Data_C_1, C_line);
         }
-        for(uint8_t i = 0; i < 49; i++)
+        for(uint8_t i = 1; i < 49; i++)
         {
-            HRUh[0][i] = fft_harmonicA_output[i+1] / fft_harmonicA_output[0] * 100;
+            HRUh[0][i] = fft_harmonicA_output[i] / fft_harmonicA_output[0] * 100;
             UH[0] += pow(HRUh[0][i], 2);
         }
         UH[0] = pow(UH[0], 0.5);
         THDu[0] = UH[0] / fft_harmonicA_output[0] * 100;
 
-        for(uint8_t i = 0; i < 49; i++)
+        for(uint8_t i = 1; i < 49; i++)
         {
-            HRUh[1][i] = fft_harmonicB_output[i+1] / fft_harmonicB_output[0] * 100;
+            HRUh[1][i] = fft_harmonicB_output[i] / fft_harmonicB_output[0] * 100;
             UH[1] += pow(HRUh[1][i], 2);
         }
         UH[1] = pow(UH[1], 0.5);
         THDu[1] = UH[1] / fft_harmonicB_output[0] * 100;
 
-        for(uint8_t i = 0; i < 49; i++)
+        for(uint8_t i = 1; i < 49; i++)
         {
-            HRUh[2][i] = fft_harmonicC_output[i+1] / fft_harmonicC_output[0] * 100;
+            HRUh[2][i] = fft_harmonicC_output[i] / fft_harmonicC_output[0] * 100;
             UH[2] += pow(HRUh[2][i], 2);
         }
         UH[2] = pow(UH[2], 0.5);
         THDu[2] = UH[2] / fft_harmonicC_output[0] * 100;
     }
-
 }
 
 /********************数据计算***************************************/
 void data_process(void)
 {
-    Voltage_sag_swell_interruption(); //电压暂升暂降 短时中断
-    Voltage_Deviation_Calc(); //电压偏差
+    // Voltage_sag_swell_interruption(); //电压暂升暂降 短时中断
+    Voltage_Deviation_Calc();
+    Voltage_Harmonic_Calc();
+    Voltage_Fluctuation_and_Flicker_Calc();
 }
-

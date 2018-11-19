@@ -97,10 +97,10 @@ union _vol_longframe_2
         // uint16_t wavlen;
         uint8_t cnt; // 50 max or 49 max
         uint16_t wav16[10];
-        uint16_t vol_HR; // harmonic ratio
+        uint16_t vol_THDu; 
         uint8_t end; // 0xe3
     }t;
-    uint8_t t_tab[VOL_LONGFRAME_END_HAR]; // total bytes
+    uint8_t t_tab[LONGFRAME_HAR_LEN]; // total bytes
 };
 
 // private variables
@@ -121,8 +121,8 @@ extern double Data_deviation[3];
 extern double fluctuation[3];
 extern double flicker_Pst[3];
 extern double flicker_Plt[3];
-
-
+extern float HRUh[3][50];
+extern float THDu[3];
 
 // function prototypes
 static void nrf_send(uint8_t *txbuf, uint8_t size);
@@ -208,18 +208,17 @@ void nrf_send_longframe_1(uint16_t buf[], uint16_t wavlen, uint16_t chl)
     #define T vol_longframe_1.t
     #define TAB vol_longframe_1.t_tab
     #define cnt_inc(n) T.cnt += n
-    // #define chl_inc() vol_longframe_1.t.channel++
     #define _cnt T.cnt
     #define wav T.wav16
     uint16_t num_of_frame_full = wavlen / 10;
     uint16_t num_of_frame_notfull = wavlen % 10;
 
-    T.bgn = VOL_LONGFRAME_BGN_TRAN;
+    T.bgn = VOL_LONGFRAME_BGN_HAR;
     T.id = SENSOR_ID;
     T.channel = chl;
     T.wavlen = wavlen;
     T.cnt = 0x00;
-    T.end = VOL_LONGFRAME_END_TRAN;
+    T.end = VOL_LONGFRAME_END_HAR;
     
     for(; _cnt < num_of_frame_full; cnt_inc(10))
     {
@@ -228,7 +227,7 @@ void nrf_send_longframe_1(uint16_t buf[], uint16_t wavlen, uint16_t chl)
             wav[i] = buf[i];
         }
         nrf_send(TAB, sizeof(TAB));
-        delay_ms(50);
+        // delay_ms(50);
     }
     if(num_of_frame_notfull)
     {
@@ -242,60 +241,43 @@ void nrf_send_longframe_1(uint16_t buf[], uint16_t wavlen, uint16_t chl)
         }
         cnt_inc(1);
         nrf_send(TAB, sizeof(TAB));
-        delay_ms(50);
+        // delay_ms(50);
     }
     #undef wav
     #undef _cnt
-    // #undef chl_inc()
     #undef cnt_inc
     #undef TAB
     #undef T
 }
 
-void nrf_send_longframe_2(uint16_t buf[], uint16_t wavlen, uint16_t chl)
+void nrf_send_longframe_2(uint16_t buf[], uint16_t chl)
 {
-    #define T vol_longframe_1.t
-    #define TAB vol_longframe_1.t_tab
+    #define T vol_longframe_2.t
+    #define TAB vol_longframe_2.t_tab
     #define cnt_inc(n) T.cnt += n
-    // #define chl_inc() vol_longframe_1.t.channel++
     #define _cnt T.cnt
     #define wav T.wav16
-    uint16_t num_of_frame_full = wavlen / 10;
-    uint16_t num_of_frame_notfull = wavlen % 10;
+    // uint16_t num_of_frame_full = wavlen / 10;
+    // uint16_t num_of_frame_notfull = wavlen % 10;
 
     T.bgn = VOL_LONGFRAME_BGN_TRAN;
     T.id = SENSOR_ID;
     T.channel = chl;
-    T.wavlen = wavlen;
     T.cnt = 0x00;
     T.end = VOL_LONGFRAME_END_TRAN;
-    
-    for(; _cnt < num_of_frame_full; cnt_inc(10))
+    T.vol_THDu = (uint16_t)(THDu[chl] * 10);
+    for(; _cnt < 10; cnt_inc(10))
     {
         for(uint16_t i = 0; i < 10; i++)
         {
-            wav[i] = (uint16_t)((((buf[i + _cnt] > 32768.0) ? (buf[i + _cnt] - 32768.0) : 0) * 5.0 / 32768.0) * 100);
+            wav[i] = (uint16_t)(HRUh[chl][i] * 10);
         }
         nrf_send(TAB, sizeof(TAB));
-        delay_ms(50);
+        // delay_ms(50);
     }
-    if(num_of_frame_notfull)
-    {
-        for(uint16_t i = 0; i < 10; i++)
-        {
-            wav[i] = 0;
-        }
-        for(uint16_t i = 0; i < num_of_frame_notfull; i++)
-        {
-            wav[i] = (uint16_t)((((buf[i + _cnt] > 32768.0) ? (buf[i + _cnt] - 32768.0) : 0) * 5.0 / 32768.0) * 100);
-        }
-        cnt_inc(1);
-        nrf_send(TAB, sizeof(TAB));
-        delay_ms(50);
-    }
+
     #undef wav
     #undef _cnt
-    // #undef chl_inc()
     #undef cnt_inc
     #undef TAB
     #undef T

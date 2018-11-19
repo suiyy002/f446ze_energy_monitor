@@ -16,9 +16,9 @@
 #define C_line 0X0C
 
 extern void data_process(void);
-extern void Voltage_Harmonic_Calc(void);
-extern void Voltage_Deviation_Calc(void);
-extern void Voltage_sag_swell_interruption(void);
+// extern void Voltage_Harmonic_Calc(void);
+// extern void Voltage_Deviation_Calc(void);
+// extern void Voltage_sag_swell_interruption(void);
 extern void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128]);
 // #endif
 

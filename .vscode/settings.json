@@ -24,7 +24,9 @@
         "alg_findextrema.h": "c",
         "stdlib.h": "c",
         "fft.h": "c",
-        "flash_internal.h": "c"
+        "flash_internal.h": "c",
+        "limits": "c",
+        "alg_sort.h": "c"
     },
     "python.pythonPath": "D:\\app\\Python\\Python37\\python.exe"
 }

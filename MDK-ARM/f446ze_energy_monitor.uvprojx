@@ -502,6 +502,21 @@
               <FileType>5</FileType>
               <FilePath>..\User\alg_findextrema.h</FilePath>
             </File>
+            <File>
+              <FileName>alg_bubblesort.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\alg_bubblesort.c</FilePath>
+            </File>
+            <File>
+              <FileName>alg_findmax_min.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\alg_findmax_min.c</FilePath>
+            </File>
+            <File>
+              <FileName>alg_sort.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\alg_sort.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
