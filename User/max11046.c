@@ -60,7 +60,7 @@ uint16_t AD_Data_B_1[128] = {0};  //B
 uint16_t AD_Data_C_0[128] = {0};  //A
 uint16_t AD_Data_C_1[128] = {0};  //A
 
-uint16_t ad_wav[2][3][6400] = {0}; // 1 second, 75KB
+uint16_t ad_wav[2][3][1280] = {0}; // 0.2s , 15KB
 uint16_t ad_wav_cnt = 0;
 uint8_t ad_wav_flg = 0;
 uint8_t ad_wav_valid = 0;
@@ -117,7 +117,7 @@ void getADdata(void)
         }
     }
     ad_wav_cnt++;
-    if(ad_wav_cnt >= 6400)
+    if(ad_wav_cnt >= 1280)
     {
         ad_wav_cnt = 0;
         ad_wav_flg ^= 1;

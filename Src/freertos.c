@@ -71,7 +71,13 @@ osThreadId defaultTaskHandle;
 /* USER CODE BEGIN Variables */
 // #define dbg_w25q64
 // #define dbg_nrf
-
+extern uint8_t AD_save_flag;
+extern uint16_t AD_Data_A_0[128];  //C
+extern uint16_t AD_Data_A_1[128];  //C
+extern uint16_t AD_Data_B_0[128];  //B
+extern uint16_t AD_Data_B_1[128];  //B
+extern uint16_t AD_Data_C_0[128];  //A
+extern uint16_t AD_Data_C_1[128];  //A
 osThreadId nrfTaskHandle;
 
 union _dgb_flg
@@ -93,6 +99,7 @@ union _dgb_flg
 extern uint8_t ad_wav_valid;
 extern uint8_t ad_wav_flg; 
 extern uint16_t ad_wav[2][3][6400];
+volatile uint32_t dbg_cnt = 0;
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
@@ -128,7 +135,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 1024);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 512);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -146,19 +153,19 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
+//  taskENTER_CRITICAL();
 
-  // start capture
-  HAL_TIM_Base_Start_IT(&htim3);
-  HAL_TIM_Base_Start_IT(&htim4);
-  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
-  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
-  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
-  
+//  taskEXIT_CRITICAL();
   /* Infinite loop */
   for(;;)
   {
+    if (0x01 == AD_save_flag)
+        Voltage_RMS_Calc(AD_Data_A_0, AD_Data_B_0, AD_Data_C_0);
+    if (0x00 == AD_save_flag)
+        Voltage_RMS_Calc(AD_Data_A_1, AD_Data_B_1, AD_Data_C_1);
+    dbg_cnt++;
     data_process();
-    osDelay(50);
+    osDelay(20);
   }
   /* USER CODE END StartDefaultTask */
 }

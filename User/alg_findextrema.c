@@ -8,31 +8,30 @@ float src_sorted[2] = {0};
 // float src_bak[10] = {0};
 // float diff_bak[10] = {0};
 int8_t sign[512] = {0}; /* 应该比src少一个元素，src_len-1，前511个元素有效 */
-uint16_t tmp_idx[12] = {0};
-uint16_t out_of_range_tab[12] = {0};
-uint16_t flag_extrema_idx[12] = {0};
-uint16_t max_idx = 0, min_idx = 0;
+uint16_t tmp_idx[512] = {0};
+uint16_t out_of_range_tab[512] = {0};
+uint16_t flag_extrema_idx[512] = {0};
+uint16_t max_idx = 0, min_idx = 0; /* 之前不小心把它拿出去了，导致运行一段时间就数组越界卡死 */
+
 void findExtrema
 (
-    float *src, uint16_t src_len, float distance,
+    float *src, uint16_t src_len, uint16_t distance,
     uint16_t *idx_max_tab, uint16_t *max_qty,
     uint16_t *idx_min_tab, uint16_t *min_qty
 )
 {
-    // *max_qty = 0;
-    // *min_qty = 0;
     for(uint16_t i = 0; i < 512; i++)
     {
         // src_bak[i] = src[i];
         sign[i] = 0;
-    }
-    for(uint16_t i = 0; i < 12; i++)
-    {
         tmp_idx[i] = 0;
         out_of_range_tab[i] = 0;
         flag_extrema_idx[i] = 0;
     }
-
+    src_sorted[0] = 0;
+    src_sorted[1] = 0;
+    max_idx = 0;
+    min_idx = 0;
     /* 找出最大值和最小值，作为之后寻找极值的标准 */
     findmax_min_f32(src, src_len, src_sorted);
     /* 后值减前值，差值为负记作 -1，为零记作 0，为正记作 1 */
@@ -185,5 +184,6 @@ void findExtrema
 
     *max_qty = max_idx;
     *min_qty = min_idx;
+    
 }
 

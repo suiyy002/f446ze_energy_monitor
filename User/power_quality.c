@@ -201,11 +201,7 @@ void Voltage_Deviation_Calc(void)
     Data_deviation[0] = (Data_deviation[0] - VOL_STD_RMS_A) / VOL_STD_RMS_A;
     Data_deviation[1] = (Data_deviation[1] - VOL_STD_RMS_B) / VOL_STD_RMS_B;
     Data_deviation[2] = (Data_deviation[2] - VOL_STD_RMS_C) / VOL_STD_RMS_C;
-    for(uint8_t i = 0; i < 3; i++)
-    {
-        if(Data_deviation[i] > 1000)
-            __nop();
-    }
+
     flg_rms_avg = 0;
 }
 
@@ -216,8 +212,8 @@ void Voltage_Deviation_Calc(void)
 
     double fluctuation[3] = {0};            /* 电压波动数据，每5.12s更新一次 */
     /* 找极值 */
-    uint16_t min_idx_tab[3][12]; /* distance是50，所以元素肯定小于12个 */
-    uint16_t max_idx_tab[3][12];
+    uint16_t min_idx_tab[3][512]; /* distance是50，所以元素肯定小于12个 */
+    uint16_t max_idx_tab[3][512];
     uint16_t max_qty[3] = {0}, min_qty[3] = {0};
     double Udiff_max[3] = {FLT_EPSINON, FLT_EPSINON, FLT_EPSINON}; // 所有极值差中最大的
     uint16_t idx_flickermeter_response_freq[36] = /* N=512, res=0.09765Hz */
@@ -325,13 +321,13 @@ void Voltage_Deviation_Calc(void)
             { /* 遍历极值索引数组 */
                 if /* 记录最大极值差 */
                 (
-                    rms_fluct[!rms_fluct_flg][j][max_idx_tab[j][i]] 
-                    - rms_fluct[!rms_fluct_flg][j][min_idx_tab[j][i]]
+                    rms_fluct[rms_fluct_flg][j][max_idx_tab[j][i]] 
+                    - rms_fluct[rms_fluct_flg][j][min_idx_tab[j][i]]
                     > Udiff_max[j]
                 ) 
                 {
-                    Udiff_max[j] = rms_fluct[!rms_fluct_flg][j][max_idx_tab[j][i]] 
-                            - rms_fluct[!rms_fluct_flg][j][min_idx_tab[j][i]];            
+                    Udiff_max[j] = rms_fluct[rms_fluct_flg][j][max_idx_tab[j][i]] 
+                            - rms_fluct[rms_fluct_flg][j][min_idx_tab[j][i]];            
                 }
             }
         }
@@ -341,9 +337,9 @@ void Voltage_Deviation_Calc(void)
             fluctuation[i] = Udiff_max[i] / VOL_STD_RMS_A * 100;
         }
         // fft
-        fft_flicker_calc(rms_fluct[!rms_fluct_flg][0], A_line);
-        fft_flicker_calc(rms_fluct[!rms_fluct_flg][1], B_line);
-        fft_flicker_calc(rms_fluct[!rms_fluct_flg][2], C_line);
+        fft_flicker_calc(rms_fluct[rms_fluct_flg][0], A_line);
+        fft_flicker_calc(rms_fluct[rms_fluct_flg][1], B_line);
+        fft_flicker_calc(rms_fluct[rms_fluct_flg][2], C_line);
         // 求解瞬时闪变值
         if(!(cnt_flicker_S < 60))
         {

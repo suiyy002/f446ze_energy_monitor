@@ -2,7 +2,7 @@
 #define __ALG_FINDEXTREMA_H__
 #include "stm32f4xx_hal.h"
 extern void findExtrema(
-    float *src, uint16_t src_len, float distance,
+    float *src, uint16_t src_len, uint16_t distance,
     uint16_t *idx_max_tab, uint16_t *max_quantity,
     uint16_t *idx_min_tab, uint16_t *min_quantity);
 extern void findmax_min_f64(double *pbuf, uint16_t size, double *max_min_tab);

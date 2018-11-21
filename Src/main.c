@@ -66,13 +66,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-extern uint8_t AD_save_flag;
-extern uint16_t AD_Data_A_0[128];  //C
-extern uint16_t AD_Data_A_1[128];  //C
-extern uint16_t AD_Data_B_0[128];  //B
-extern uint16_t AD_Data_B_1[128];  //B
-extern uint16_t AD_Data_C_0[128];  //A
-extern uint16_t AD_Data_C_1[128];  //A
+
 // #define __SORT_TEST__
 #ifdef __SORT_TEST__
   #include "alg_findextrema.h"
@@ -145,7 +139,12 @@ int main(void)
   AD_IO_INIT();
   Configuration_AD_register();
   HAL_Delay(10);
-
+  // start capture
+  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
   #ifdef __SORT_TEST__
     bubble_sort_f32(test_arr, 512);
     __nop();
@@ -401,10 +400,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim->Instance == TIM4)
   {
     getADdata();
-    if (0x01 == AD_save_flag)
-        Voltage_RMS_Calc(AD_Data_A_0, AD_Data_B_0, AD_Data_C_0);
-    if (0x00 == AD_save_flag)
-        Voltage_RMS_Calc(AD_Data_A_1, AD_Data_B_1, AD_Data_C_1);
   }
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM14) {
