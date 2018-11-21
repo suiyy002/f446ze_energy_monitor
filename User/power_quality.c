@@ -5,7 +5,7 @@
 #include "alg_findextrema.h"
 #include "alg_sort.h"
 
-
+#define FLT_EPSINON 1e-7f
 extern uint8_t AD_save_flag, AD_save_flag1;
 
 extern uint16_t AD_Data_A_0[128];  //C
@@ -216,10 +216,10 @@ void Voltage_Deviation_Calc(void)
 
     double fluctuation[3] = {0};            /* 电压波动数据，每5.12s更新一次 */
     /* 找极值 */
-    uint16_t min_idx_tab[3][12]; /* distance是50，所以元素肯定小于12个 */
-    uint16_t max_idx_tab[3][12];
+    uint16_t min_idx_tab[3][512]; /* distance是50，所以元素肯定小于12个 */
+    uint16_t max_idx_tab[3][512];
     uint16_t max_qty[3] = {0}, min_qty[3] = {0};
-    double Udiff_max[3] = {0.00000001, 0.00000001, 0.00000001}; // 所有极值差中最大的
+    double Udiff_max[3] = {FLT_EPSINON, FLT_EPSINON, FLT_EPSINON}; // 所有极值差中最大的
     uint16_t idx_flickermeter_response_freq[36] = /* N=512, res=0.09765Hz */
     {
         6,
