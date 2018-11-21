@@ -1,74 +1,41 @@
 /* 参考 https://blog.csdn.net/zone53/article/details/77942341 */
-// #include <stdio.h>
 #include "alg_sort.h"
 #include "alg_findextrema.h"
-// #include "float.h"
-// #include "FreeRTOS.h"
-// #define MALLOC malloc
-// #define FREE free
-// int cmp( const void *a , const void *b )
-// {
-//     return *(float *)a > *(float *)b ? 1 : -1;
-// }
-/* wrapper for malloc */
-//void *malloc(size_t size)
-//{
-//    return pvPortMalloc(size);
-//}
-//void free(void *ptr)
-//{
-//    vPortFree(ptr);
-//}
-/*
-    * 函数:    findExtrema
-    * 参数:    *src             原始数据数组
-    *          src_len          原始数据数组数组长度
-    *          distance         最大相邻极小/大值之间的距离
-    *          *idx_max_tab     找到的极大值的index数组
-    *          *max_qty    极大值个数
-    *          *idx_min_tab     找到的极小值的index数组
-    *          *min_qty    极小值个数
-*/
+
 const float FLT_EPSINON = 1e-7;
-// const float FLT_EPSILON = 1.192092896e-07F; /* smallest such that 1.0+FLT_EPSILON != 1.0 */
 
 float src_sorted[2] = {0};
 // float src_bak[10] = {0};
 // float diff_bak[10] = {0};
-int8_t sign[512] = {0};
-uint16_t tmp_max_idx[512] = {0};
-uint16_t out_of_range_tab[512] = {0};
-uint16_t flag_extrema_idx[512] = {0};
+int8_t sign[512] = {0}; /* 应该比src少一个元素，src_len-1，前511个元素有效 */
+uint16_t tmp_idx[12] = {0};
+uint16_t out_of_range_tab[12] = {0};
+uint16_t flag_extrema_idx[12] = {0};
 uint16_t max_idx = 0, min_idx = 0;
-void findExtrema(
+void findExtrema
+(
     float *src, uint16_t src_len, float distance,
     uint16_t *idx_max_tab, uint16_t *max_qty,
-    uint16_t *idx_min_tab, uint16_t *min_qty)
+    uint16_t *idx_min_tab, uint16_t *min_qty
+)
 {
-    for(uint16_t i = 0; i < 20; i++)
+    // *max_qty = 0;
+    // *min_qty = 0;
+    for(uint16_t i = 0; i < 512; i++)
     {
         // src_bak[i] = src[i];
         sign[i] = 0;
-        tmp_max_idx[i] = 0;
+    }
+    for(uint16_t i = 0; i < 12; i++)
+    {
+        tmp_idx[i] = 0;
         out_of_range_tab[i] = 0;
         flag_extrema_idx[i] = 0;
     }
-//    double diff = 0;
-    // return;
-    // 开辟一段空间，记录差值符号信息
-    // int *sign = (int *)malloc(src_len * sizeof(int));
-    // 记录极值位置的数组的索引
-    *max_qty = 0;
-    *min_qty = 0;
-    // float *src_sorted = (float *)malloc(src_len * sizeof(float));
-//    for(int i = 0; i < src_len; i++)
-//    {
-//        src_sorted[i] = src[i];
-//    }
-    // qsort(src_sorted, src_len, sizeof(float), cmp);
-    // bubble_sort_f32();
+
+    /* 找出最大值和最小值，作为之后寻找极值的标准 */
     findmax_min_f32(src, src_len, src_sorted);
-    // 后值减前值，差值为负记作 -1，为零记作 0，为正记作 1
+    /* 后值减前值，差值为负记作 -1，为零记作 0，为正记作 1 */
     for (int i = 1; i < src_len; i++)
     {
         float diff = src[i] - src[i - 1];
@@ -80,7 +47,8 @@ void findExtrema(
         else if ((diff >= -FLT_EPSINON) && (diff <= FLT_EPSINON))
             sign[i - 1] = 0;
     }
-    for (int j = 1; j < src_len - 1; j++)
+    /* 判断极大值、极小值位置 */
+    for (int j = 1; j < src_len - 1; j++) /* sign有效的值个数为src_len-1 */
     {
         float diff = sign[j] - sign[j - 1];
         if (diff < -FLT_EPSINON)
@@ -88,28 +56,24 @@ void findExtrema(
         else if (diff > FLT_EPSINON)
             idx_min_tab[min_idx++] = j;
     }
-
-    // int *flag_extrema_idx = (int *)malloc(sizeof(int) * (max_idx > min_idx ? max_idx : min_idx));
-    // int *out_of_range_tab = (int *)malloc(sizeof(int) * (max_idx > min_idx ? max_idx : min_idx));
-    // int *tmp_max_idx = (int *)malloc(sizeof(int) * (max_idx > min_idx ? max_idx : min_idx));
-    // 最大值索引
-    int extrema = 0, extrema_old = 0;
+    /* 最大值索引 */
+    int extrema = 0, extrema_old = 555; /* old初始值不能为零 */
     double tmp_val = FLT_EPSINON;
     int i, j, k;
-    //波峰
-    for (int i = 0; i < max_idx; i++)
+    /* 开始检测极大值是否在范围内 */
+    for (i = 0; i < max_idx; i++)
     {
         flag_extrema_idx[i] = 0;
         out_of_range_tab[i] = 0;
     }
-
     for (i = 0; i < max_idx; i++)
     {
-        tmp_val = src_sorted[0];
-        /* 捶出一个新最大值*/
+        /* 初始最小值 */
+        tmp_val = src_sorted[1];
+        /* 遍历极大值列表，捶出一个新最大值*/
         for (j = 0; j < max_idx; j++)
         {
-            // 已经剔除的就不用检测了
+            /* 已经剔除的就不用检测了 */
             if (!flag_extrema_idx[j] && !out_of_range_tab[j])
             {
                 if (src[idx_max_tab[j]] > tmp_val)
@@ -119,52 +83,59 @@ void findExtrema(
                 }
             }
         }
+        /* 经过上面的遍历比较，如果本次极大值索引等于上次极大值索引，说明应该结束检测 */
         if(extrema == extrema_old)
         {
             break;
         }
-        // 记录最大值位置, 下次跳过这个点再找一个新的最大值(伪)
+        /* 记录最大值位置, 下次跳过这个点再找一个新的最大值(伪) */
         flag_extrema_idx[extrema] = 1;
-            for (k = 0; k < max_idx; k++)
+        /* 检测有无其他极大值落在本次极大值的邻域内，有则剔除邻域内的其他极大值 */
+        for (k = 0; k < max_idx; k++)
+        {
+            if
+            (
+                idx_max_tab[k] - distance <= idx_max_tab[extrema]
+                &
+                idx_max_tab[k] + distance >= idx_max_tab[extrema]
+                &
+                k != extrema /* 可不能剔除自身（笑） */
+            )
             {
-                if
-                (
-                    idx_max_tab[k] - distance <= idx_max_tab[extrema]
-                    &
-                    idx_max_tab[extrema] <= idx_max_tab[k] + distance
-                    &
-                    k != extrema
-                )
-                {
-                    out_of_range_tab[k] = 1;
-                    src[k] = 0;
-                }
+                out_of_range_tab[k] = 1; /* 剔除记录表 */
+                src[k] = 0; /* 赋零剔除 */
             }
-            extrema_old = extrema;
+        }
+        extrema_old = extrema;
     }
+    /* 剔除完成，将剩余在distance范围内的极大值依次存储 */
     for (i = 0, j = 0; i < max_idx; i++)
     {
-        if (!out_of_range_tab[i])
-            tmp_max_idx[j++] = idx_max_tab[i];
+        if (!out_of_range_tab[i]) /* 未经剔除的值 */
+            tmp_idx[j++] = idx_max_tab[i];
     }
+    /* 前j个索引值存为极大值，后面的索引值清空 */
     for (i = 0; i < max_idx; i++)
     {
         if (i < j)
-            idx_max_tab[i] = tmp_max_idx[i];
+            idx_max_tab[i] = tmp_idx[i];
         else
             idx_max_tab[i] = 0;
     }
+    /* 极大值个数 */
     max_idx = j;
 
-    //波谷
-    for (int i = 0; i < min_idx; i++)
+    /* 开始检测极小值是否在范围内 */
+    for (i = 0; i < min_idx; i++)
     {
         flag_extrema_idx[i] = 0;
         out_of_range_tab[i] = 0;
+        tmp_idx[i] = 0;
     }
     for (i = 0; i < min_idx; i++)
     {
-        tmp_val = src_sorted[1];
+        /* 初始最大值 */
+        tmp_val = src_sorted[0];
         for (j = 0; j < min_idx; j++)
         {
             if (!flag_extrema_idx[j] && !out_of_range_tab[j])
@@ -181,33 +152,32 @@ void findExtrema(
             break;
         }
         flag_extrema_idx[extrema] = 1;
-
-            for (k = 0; k < min_idx; k++)
+        for (k = 0; k < min_idx; k++)
+        {
+            if
+            (
+                idx_min_tab[k] - distance <= idx_min_tab[extrema]
+                &
+                idx_min_tab[k] + distance >= idx_min_tab[extrema]
+                &
+                k != extrema
+            )
             {
-                if
-                (
-                    idx_max_tab[k] - distance <= idx_max_tab[extrema]
-                    &
-                    idx_max_tab[extrema] <= idx_max_tab[k] + distance
-                    &
-                    k != extrema
-                )
-                {
-                    out_of_range_tab[k] = 1;
-                    src[k] = 0;
-                }
+                out_of_range_tab[k] = 1;
+                src[k] = 0;
             }
+        }
         extrema_old = extrema;
     }
     for (i = 0, j = 0; i < min_idx; i++)
     {
         if (!out_of_range_tab[i])
-            tmp_max_idx[j++] = idx_min_tab[i];
+            tmp_idx[j++] = idx_min_tab[i];
     }
     for (i = 0; i < min_idx; i++)
     {
         if (i < j)
-            idx_min_tab[i] = tmp_max_idx[i];
+            idx_min_tab[i] = tmp_idx[i];
         else
             idx_min_tab[i] = 0;
     }
@@ -215,11 +185,5 @@ void findExtrema(
 
     *max_qty = max_idx;
     *min_qty = min_idx;
-
-    // free(sign);
-    // free(src_sorted);
-    // free(flag_extrema_idx);
-    // free(tmp_max_idx);
-    // free(out_of_range_tab);
 }
 

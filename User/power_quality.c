@@ -216,8 +216,8 @@ void Voltage_Deviation_Calc(void)
 
     double fluctuation[3] = {0};            /* 电压波动数据，每5.12s更新一次 */
     /* 找极值 */
-    uint16_t min_idx_tab[3][512]; /* distance是50，所以元素肯定小于12个 */
-    uint16_t max_idx_tab[3][512];
+    uint16_t min_idx_tab[3][12]; /* distance是50，所以元素肯定小于12个 */
+    uint16_t max_idx_tab[3][12];
     uint16_t max_qty[3] = {0}, min_qty[3] = {0};
     double Udiff_max[3] = {FLT_EPSINON, FLT_EPSINON, FLT_EPSINON}; // 所有极值差中最大的
     uint16_t idx_flickermeter_response_freq[36] = /* N=512, res=0.09765Hz */

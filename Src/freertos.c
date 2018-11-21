@@ -128,13 +128,13 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 1024);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-  osThreadDef(nrfTask, StartNrfTask, osPriorityLow, 0, 128);
-  nrfTaskHandle = osThreadCreate(osThread(nrfTask), NULL);
+//  osThreadDef(nrfTask, StartNrfTask, osPriorityLow, 0, 512);
+//  nrfTaskHandle = osThreadCreate(osThread(nrfTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -146,8 +146,14 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void const * argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-  
 
+  // start capture
+  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_4);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
+  
   /* Infinite loop */
   for(;;)
   {
@@ -162,7 +168,6 @@ void StartDefaultTask(void const * argument)
 
 void StartNrfTask(void const * arg)
 {
-
   // initialization of nrf24
   while(!NRF_Check(0))
   {
