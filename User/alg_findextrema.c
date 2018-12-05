@@ -2,9 +2,13 @@
 #include "alg_sort.h"
 #include "alg_findextrema.h"
 
-const float FLT_EPSINON = 1e-7;
-
+// const float FLT_EPSINON = 1e-7;
+const float FLT_EPSINON = 1e-4;
+uint16_t max_pos = 0;
+double tmp = 0;
+float max_tmp = 0, min_tmp = 0;
 float src_sorted[2] = {0};
+volatile uint8_t __id = 2;
 // float src_bak[10] = {0};
 // float diff_bak[10] = {0};
 int8_t sign[512] = {0}; /* 应该比src少一个元素，src_len-1，前511个元素有效 */
@@ -17,7 +21,8 @@ void findExtrema
 (
     float *src, uint16_t src_len, uint16_t distance,
     uint16_t *idx_max_tab, uint16_t *max_qty,
-    uint16_t *idx_min_tab, uint16_t *min_qty
+    uint16_t *idx_min_tab, uint16_t *min_qty, 
+    uint8_t id
 )
 {
     for(uint16_t i = 0; i < 512; i++)
@@ -27,6 +32,8 @@ void findExtrema
         tmp_idx[i] = 0;
         out_of_range_tab[i] = 0;
         flag_extrema_idx[i] = 0;
+        idx_max_tab[i] = 0;
+        idx_min_tab[i] = 0;
     }
     src_sorted[0] = 0;
     src_sorted[1] = 0;
@@ -102,7 +109,7 @@ void findExtrema
             )
             {
                 out_of_range_tab[k] = 1; /* 剔除记录表 */
-                src[k] = 0; /* 赋零剔除 */
+//                src[k] = 0; /* 赋零剔除 */
             }
         }
         extrema_old = extrema;
@@ -163,7 +170,7 @@ void findExtrema
             )
             {
                 out_of_range_tab[k] = 1;
-                src[k] = 0;
+//                src[k] = 0;
             }
         }
         extrema_old = extrema;
@@ -184,6 +191,33 @@ void findExtrema
 
     *max_qty = max_idx;
     *min_qty = min_idx;
-    
+
+    #if 1
+        // extern volatile uint8_t rms_fluct_flg;
+        // extern float rms_fluct[2][3][512];
+        max_pos = 0;
+        tmp = 0;
+        max_tmp = 0, min_tmp = 0;
+        extern double Udiff_max[3];
+        Udiff_max[id] = 0;
+        if(id == __id)
+          __nop();
+        for(uint8_t i = 0; i < (max_idx >= min_idx ? min_idx : max_idx); i++)
+        {
+            tmp = src[idx_max_tab[i]] - src[idx_min_tab[i]];
+//            Udiff_max[id] = (tmp > Udiff_max[id]) ? tmp : Udiff_max[id];
+            if(tmp > Udiff_max[id] && tmp < 1.0)
+            {
+                Udiff_max[id] = tmp;
+                max_tmp = src[idx_max_tab[i]];
+                min_tmp = src[idx_min_tab[i]];
+                max_pos = i;
+            }
+            if(Udiff_max[id] > 1)
+                __nop();
+        }
+        if(id == __id)
+          __nop();
+    #endif
 }
 

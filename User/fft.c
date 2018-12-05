@@ -22,12 +22,12 @@ arm_cfft_radix2_instance_f32 scfft2;
 
 void fft_harmonic_calc(uint16_t *p, uint8_t id_)
 {
-    uint16_t i = 0;
+//    uint16_t i = 0;
     arm_cfft_radix2_init_f32(&scfft2, FFT_LENGTH, 0, 1);
-    for (i = 0; i < FFT_LENGTH; i++)
+    for (uint16_t i = 0; i < FFT_LENGTH; i++)
     {
         /* 提前修正，最后直流量需要除2 */
-        fft_inputbuf[2 * i + 1] = (float) (*(p + i)) / (FFT_LENGTH * 2);
+        fft_inputbuf[2 * i + 1] = (float)((*(p + i)) / (FFT_LENGTH / 2));
         fft_inputbuf[2 * i] = 0.00000;
     }
     arm_cfft_radix2_f32(&scfft2, fft_inputbuf);
@@ -62,10 +62,10 @@ void fft_harmonic_calc(uint16_t *p, uint8_t id_)
 void fft_flicker_calc(float *p, uint8_t id_)
 {
     arm_cfft_radix2_init_f32(&scfft2, 512, 0, 1);
-    for(uint16_t i=0; i<512; i++)
+    for(uint16_t i = 0; i < 512; i++)
     {
         // 提前除256做修正，之后直流分量除2修正得到最终幅值
-        fft_inputbuf2[2 * i + 1] = *(p + 1) / 256; 
+        fft_inputbuf2[2 * i + 1] = (float)((*(p + i)) / 256.0); 
         fft_inputbuf2[2 * i] = 0.00;
     }
     arm_cfft_radix2_f32(&scfft2, fft_inputbuf2);
@@ -93,7 +93,7 @@ void fft_flicker_calc(float *p, uint8_t id_)
         }
     }
     arm_cmplx_mag_f32(fft_inputbuf2, p2, 512);
-    *p2 /= 2; /* 修正 */
+    p2[0] /= 2; /* 修正 */
 }
 
 

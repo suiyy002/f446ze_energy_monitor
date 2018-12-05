@@ -11,13 +11,13 @@
 #define VOL_STD_FACTOR 50.9915014164305949
 #define PI_ 3.141592654
 
-#define A_line 0X0A
-#define B_line 0X0B
-#define C_line 0X0C
+#define A_line 0x0A
+#define B_line 0x0B
+#define C_line 0x0C
 
 extern void data_process(void);
 // extern void Voltage_Harmonic_Calc(void);
-// extern void Voltage_Deviation_Calc(void);
+extern void Voltage_Deviation_Calc(void);
 // extern void Voltage_sag_swell_interruption(void);
 extern void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128]);
 // #endif

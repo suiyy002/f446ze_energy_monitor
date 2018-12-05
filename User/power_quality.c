@@ -31,7 +31,7 @@ double rms_avg[2][3] = {0};     // 均值, Voltage_Deviation_Calc
 uint8_t flg_rms_avg = 0;
 uint16_t rms_cnt = 0;
 float rms_fluct[2][3][512] = {0};         /* 三相rms离散数据 */
-uint8_t rms_fluct_flg = 0;
+volatile uint8_t rms_fluct_flg = 0;
 uint16_t idx_rms_fluct = 0;             /* 三相rms离散数据索引 */
 volatile uint8_t flg_rms_fluct_valid = 0;
 void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128])
@@ -52,10 +52,7 @@ void Voltage_RMS_Calc(uint16_t ad1[128], uint16_t ad2[128], uint16_t ad3[128])
     ad_RMS[0] = sqrt(AD_data_sum[0] / 128);
     ad_RMS[1] = sqrt(AD_data_sum[1] / 128);
     ad_RMS[2] = sqrt(AD_data_sum[2] / 128);
-    for(i = 0; i < 3; i++)
-    {
-        AD_data_sum[i] = 0;
-    }
+
     if(!(idx_rms_fluct < 512))
     {
         idx_rms_fluct = 0;
@@ -212,8 +209,8 @@ void Voltage_Deviation_Calc(void)
 
     double fluctuation[3] = {0};            /* 电压波动数据，每5.12s更新一次 */
     /* 找极值 */
-    uint16_t min_idx_tab[3][512]; /* distance是50，所以元素肯定小于12个 */
-    uint16_t max_idx_tab[3][512];
+    uint16_t min_idx_tab[3][512] = {0}; /* distance是50，所以元素肯定小于12个 */
+    uint16_t max_idx_tab[3][512] = {0};
     uint16_t max_qty[3] = {0}, min_qty[3] = {0};
     double Udiff_max[3] = {FLT_EPSINON, FLT_EPSINON, FLT_EPSINON}; // 所有极值差中最大的
     uint16_t idx_flickermeter_response_freq[36] = /* N=512, res=0.09765Hz */
@@ -314,90 +311,89 @@ void Voltage_Deviation_Calc(void)
         // 寻找极值
         for(uint8_t j = 0; j < 3; j++) /* 遍历三相数组 */
         {
-           findExtrema(rms_fluct[!rms_fluct_flg][j], 512, 50, 
-               max_idx_tab[j], &max_qty[j], min_idx_tab[j], &min_qty[j]);
-            /* 问号表达式作用是取相邻极值 */
-            for(uint8_t i = 0; i < (max_qty[j] > min_qty[j] ? min_qty[j] : max_qty[j]); i++)
-            { /* 遍历极值索引数组 */
-                if /* 记录最大极值差 */
-                (
-                    rms_fluct[rms_fluct_flg][j][max_idx_tab[j][i]] 
-                    - rms_fluct[rms_fluct_flg][j][min_idx_tab[j][i]]
-                    > Udiff_max[j]
-                ) 
-                {
-                    Udiff_max[j] = rms_fluct[rms_fluct_flg][j][max_idx_tab[j][i]] 
-                            - rms_fluct[rms_fluct_flg][j][min_idx_tab[j][i]];            
+            findExtrema(rms_fluct[!rms_fluct_flg][j], 512, 50, 
+               max_idx_tab[j], &max_qty[j], min_idx_tab[j], &min_qty[j], j);
+            #if 0
+                /* 问号表达式作用是取相邻极值 */
+                for(uint8_t i = 0; i < (max_qty[j] > min_qty[j] ? min_qty[j] : max_qty[j]); i++)
+                { /* 遍历极值索引数组 */
+                    double tmp = rms_fluct[!rms_fluct_flg][j][max_idx_tab[j][i]] 
+                        - rms_fluct[!rms_fluct_flg][j][min_idx_tab[j][i]];
+                    Udiff_max[j] = (tmp > Udiff_max[j]) ? tmp : Udiff_max[j];
+                    if(Udiff_max[j] > 1)
+                        __nop();
                 }
-            }
+            #endif
         }
-        // 开始计算电压波动，百分比表示
-        for(uint8_t i = 0; i < 3; i++)
-        {
-            fluctuation[i] = Udiff_max[i] / VOL_STD_RMS_A * 100;
-        }
-        // fft
-        fft_flicker_calc(rms_fluct[rms_fluct_flg][0], A_line);
-        fft_flicker_calc(rms_fluct[rms_fluct_flg][1], B_line);
-        fft_flicker_calc(rms_fluct[rms_fluct_flg][2], C_line);
-        // 求解瞬时闪变值
-        if(!(cnt_flicker_S < 60))
-        {
-            cnt_flicker_S = 0;
-            flg_flicker_S ^= 1;
-            if(!(cnt_Pst < 12))
-            {
-                cnt_Pst = 0;
-                for(uint8_t i = 0; i < 3; i++)
-                {
-                    for(uint8_t j = 0; j < 12; j++)
-                    {
-                        flicker_Plt[i] += pow(flicker_Pst_tab[i][j], 3); /* 立方和，求平均 */
-                    }
-                    flicker_Plt[i] /= 12;
-                    flicker_Plt[i] = pow(flicker_Plt[i], 1.0 / 3); /* 开立方 */
-                }
-                flg_Plt_valid = 1; /* 长时闪变计算完成 */ 
-            }
+        #if 1
+            // 开始计算电压波动，百分比表示
             for(uint8_t i = 0; i < 3; i++)
             {
-                // qsort(flicker_S[!flg_flicker_S][i], 60, sizeof(double), qsort_cmp);
-                bubble_sort_f64(flicker_S[!flg_flicker_S][i], 60);
-                /* 论文公式 */
-                flicker_Pst[i] = 0.0314 * flicker_S[!flg_flicker_S][i][1]
-                               + 0.0525 * flicker_S[!flg_flicker_S][i][1]
-                               + 0.0657 * flicker_S[!flg_flicker_S][i][2]
-                               + 0.2800 * flicker_S[!flg_flicker_S][i][6]
-                               + 0.0800 * flicker_S[!flg_flicker_S][i][30];
-                flicker_Pst_tab[i][cnt_Pst] = flicker_Pst[i];
+                fluctuation[i] = Udiff_max[i] / VOL_STD_RMS_A * 100;
             }
-            flg_Pst_valid = 1;
-            cnt_Pst++;
-        }
-        for(uint8_t i = 0; i < 36; i++) // 查表求解
-        {
-            flicker_S[flg_flicker_S][0][cnt_flicker_S] /* 0代表A相 */
-            += pow(
-                (fft_flicker_out_A[idx_flickermeter_response_freq[i]] / fft_flicker_out_A[0])
-                / sinusoidal_voltage_flickermeter_response[i],
-                2);
-        }
-        for(uint8_t i = 0; i < 36; i++)
-        {
-            flicker_S[flg_flicker_S][1][cnt_flicker_S] /* 1代表B相 */
-            += pow(
-                (fft_flicker_out_B[idx_flickermeter_response_freq[i]] / fft_flicker_out_B[0])
-                / sinusoidal_voltage_flickermeter_response[i],
-                2);
-        }
-        for(uint8_t i = 0; i < 36; i++)
-        {
-            flicker_S[flg_flicker_S][2][cnt_flicker_S] /* 2代表C相 */
-            += pow(
-                (fft_flicker_out_C[idx_flickermeter_response_freq[i]] / fft_flicker_out_C[0])
-                / sinusoidal_voltage_flickermeter_response[i],
-                2);
-        }
+            // fft
+            fft_flicker_calc(rms_fluct[!rms_fluct_flg][0], A_line);
+            fft_flicker_calc(rms_fluct[!rms_fluct_flg][1], B_line);
+            fft_flicker_calc(rms_fluct[!rms_fluct_flg][2], C_line);
+            // 求解瞬时闪变值
+            if(!(cnt_flicker_S < 60))
+            {
+                cnt_flicker_S = 0;
+                flg_flicker_S ^= 1;
+                if(!(cnt_Pst < 12))
+                {
+                    cnt_Pst = 0;
+                    for(uint8_t i = 0; i < 3; i++)
+                    {
+                        for(uint8_t j = 0; j < 12; j++)
+                        {
+                            flicker_Plt[i] += pow(flicker_Pst_tab[i][j], 3); /* 立方和，求平均 */
+                        }
+                        flicker_Plt[i] /= 12;
+                        flicker_Plt[i] = pow(flicker_Plt[i], 1.0 / 3); /* 开立方 */
+                    }
+                    flg_Plt_valid = 1; /* 长时闪变计算完成 */ 
+                }
+                for(uint8_t i = 0; i < 3; i++)
+                {
+                    // qsort(flicker_S[!flg_flicker_S][i], 60, sizeof(double), qsort_cmp);
+                    bubble_sort_f64(flicker_S[!flg_flicker_S][i], 60);
+                    /* 论文公式 */
+                    flicker_Pst[i] = 0.0314 * flicker_S[!flg_flicker_S][i][1]
+                                + 0.0525 * flicker_S[!flg_flicker_S][i][1]
+                                + 0.0657 * flicker_S[!flg_flicker_S][i][2]
+                                + 0.2800 * flicker_S[!flg_flicker_S][i][6]
+                                + 0.0800 * flicker_S[!flg_flicker_S][i][30];
+                    flicker_Pst_tab[i][cnt_Pst] = flicker_Pst[i];
+                }
+                flg_Pst_valid = 1;
+                cnt_Pst++;
+            }
+            for(uint8_t i = 0; i < 36; i++) // 查表求解
+            {
+                flicker_S[flg_flicker_S][0][cnt_flicker_S] /* 0代表A相 */
+                += pow(
+                    (fft_flicker_out_A[idx_flickermeter_response_freq[i]] / fft_flicker_out_A[0])
+                    / sinusoidal_voltage_flickermeter_response[i],
+                    2);
+            }
+            for(uint8_t i = 0; i < 36; i++)
+            {
+                flicker_S[flg_flicker_S][1][cnt_flicker_S] /* 1代表B相 */
+                += pow(
+                    (fft_flicker_out_B[idx_flickermeter_response_freq[i]] / fft_flicker_out_B[0])
+                    / sinusoidal_voltage_flickermeter_response[i],
+                    2);
+            }
+            for(uint8_t i = 0; i < 36; i++)
+            {
+                flicker_S[flg_flicker_S][2][cnt_flicker_S] /* 2代表C相 */
+                += pow(
+                    (fft_flicker_out_C[idx_flickermeter_response_freq[i]] / fft_flicker_out_C[0])
+                    / sinusoidal_voltage_flickermeter_response[i],
+                    2);
+            }
+        #endif
         cnt_flicker_S++;
         flg_rms_fluct_valid = 0;
     }
@@ -463,7 +459,7 @@ void Voltage_Harmonic_Calc(void)
 void data_process(void)
 {
     // Voltage_sag_swell_interruption(); //电压暂升暂降 短时中断
-    Voltage_Deviation_Calc();
+    // Voltage_Deviation_Calc();
     Voltage_Harmonic_Calc();
     Voltage_Fluctuation_and_Flicker_Calc();
 }

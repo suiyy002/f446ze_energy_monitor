@@ -86,8 +86,18 @@
 // #define __FLASH_TEST__
 #ifdef __FLASH_TEST__  /* flash_internal.c test */
   volatile uint16_t err_flg = 0x00;
-  extern uint16_t ad_wav[2][3][6400]; // 1 second, 75KB
+  extern uint16_t ad_wav[2][3][1280]; // 1 second, 75KB
 #endif  /* flash_internal.c test */
+// #define __TEST_FLICKER__
+#ifdef __TEST_FLICKER__
+  extern uint8_t AD_save_flag;
+  extern uint16_t AD_Data_A_0[128];  //C
+  extern uint16_t AD_Data_A_1[128];  //C
+  extern uint16_t AD_Data_B_0[128];  //B
+  extern uint16_t AD_Data_B_1[128];  //B
+  extern uint16_t AD_Data_C_0[128];  //A
+  extern uint16_t AD_Data_C_1[128];  //A
+#endif
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -179,7 +189,7 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-    #if __UTIL_TEST__ /* util.c test */
+    #ifdef __UTIL_TEST__ /* util.c test */
       ptmp_ = endian_exchange(tmp_, 2);
       tmp_ = *(uint16_t*)ptmp_;
       ptmp_32 = endian_exchange(tmp_32, 4);
@@ -188,7 +198,14 @@ int main(void)
       tmp_64 = *(uint64_t*)ptmp_64;
     __nop();
     #endif /* util.c test */
-    
+    #ifdef __TEST_FLICKER__
+      if (0x01 == AD_save_flag)
+      Voltage_RMS_Calc(AD_Data_A_0, AD_Data_B_0, AD_Data_C_0);
+      if (0x00 == AD_save_flag)
+          Voltage_RMS_Calc(AD_Data_A_1, AD_Data_B_1, AD_Data_C_1);
+      data_process();
+      // osDelay(20);
+    #endif
   }
   /* USER CODE END 3 */
 

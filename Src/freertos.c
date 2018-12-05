@@ -140,8 +140,8 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
-//  osThreadDef(nrfTask, StartNrfTask, osPriorityLow, 0, 512);
-//  nrfTaskHandle = osThreadCreate(osThread(nrfTask), NULL);
+  osThreadDef(nrfTask, StartNrfTask, osPriorityNormal, 0, 512);
+  nrfTaskHandle = osThreadCreate(osThread(nrfTask), NULL);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
@@ -164,8 +164,8 @@ void StartDefaultTask(void const * argument)
     if (0x00 == AD_save_flag)
         Voltage_RMS_Calc(AD_Data_A_1, AD_Data_B_1, AD_Data_C_1);
     dbg_cnt++;
-    data_process();
-    osDelay(20);
+    Voltage_Deviation_Calc();
+    osDelay(10);
   }
   /* USER CODE END StartDefaultTask */
 }
@@ -176,28 +176,29 @@ void StartDefaultTask(void const * argument)
 void StartNrfTask(void const * arg)
 {
   // initialization of nrf24
-  while(!NRF_Check(0))
-  {
-    dgb_flg.flg.nrf_err = 1;
-  }
-  dgb_flg.flg.nrf_err = 0;
+//  while(!NRF_Check(0))
+//  {
+//    dgb_flg.flg.nrf_err = 1;
+//  }
+//  dgb_flg.flg.nrf_err = 0;
   
   //thread loop
   for(;;)
   {
-    // do something
-    if(dgb_flg.flg.nrf_send)
-    {
-      dgb_flg.flg.nrf_send = 0;
-      nrf_send_shortframe_1();
-    }
-    nRF24L01_Revceive(0);
-    if(ad_wav_valid && dgb_flg.flg.flash_save)
-    {
-      flash_erase(7);
-      flash_write((uint16_t*)ad_wav[!ad_wav_flg], 7, 3*6400);
-    }
-    osDelay(100);
+    // // do something
+    // if(dgb_flg.flg.nrf_send)
+    // {
+    //   dgb_flg.flg.nrf_send = 0;
+    //   nrf_send_shortframe_1();
+    // }
+    // nRF24L01_Revceive(0);
+    // if(ad_wav_valid && dgb_flg.flg.flash_save)
+    // {
+    //   flash_erase(7);
+    //   flash_write((uint16_t*)ad_wav[!ad_wav_flg], 7, 3*1280);
+    // }
+    data_process();
+    osDelay(150);
   }
 }
 /* USER CODE END Application */
